@@ -107,7 +107,19 @@ stopsRouter.patch(
   validate({ body: updateStopSchema }),
   asyncHandler(async (req, res) => {
     const { tripId, stopId } = req.params as Params;
-    await loadStop(tripId, stopId!);
+    const current = await loadStop(tripId, stopId!);
+
+    // updateStopSchema cannot compare the two dates because either may be absent,
+    // so the merged range is checked here.
+    const body = req.body as { startDate?: Date; endDate?: Date };
+    const startDate = body.startDate ?? current.startDate;
+    const endDate = body.endDate ?? current.endDate;
+    if (endDate < startDate) {
+      throw ApiError.badRequest('Validation failed', {
+        body: [{ path: 'endDate', message: 'endDate must be on or after startDate' }],
+      });
+    }
+
     res.json(
       await prisma.tripStop.update({
         where: { id: stopId },

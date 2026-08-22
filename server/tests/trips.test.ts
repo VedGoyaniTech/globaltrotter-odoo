@@ -151,3 +151,49 @@ describe('GET /api/trips/:id/timeline', () => {
     expect(res.body.days[2].cityName).toBeNull();
   });
 });
+
+describe('PATCH date-range validation', () => {
+  it('rejects a partial update that would invert the trip range', async () => {
+    const { user, token } = await makeUser();
+    const trip = await makeTrip(user.id); // 2026-06-01 .. 2026-06-05
+
+    // Only startDate is sent, so the schema-level refine cannot catch this.
+    const res = await api()
+      .patch(`/api/trips/${trip.id}`)
+      .set(auth(token))
+      .send({ startDate: '2026-06-10' });
+
+    expect(res.status).toBe(400);
+    expect(res.body.details.body[0].path).toBe('endDate');
+  });
+
+  it('allows a partial update that keeps the range valid', async () => {
+    const { user, token } = await makeUser();
+    const trip = await makeTrip(user.id);
+
+    const res = await api()
+      .patch(`/api/trips/${trip.id}`)
+      .set(auth(token))
+      .send({ startDate: '2026-06-02' });
+
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects a partial update that would invert a stop range', async () => {
+    const { user, token } = await makeUser();
+    const trip = await makeTrip(user.id);
+    const city = await makeCity({ name: 'Ghent' });
+
+    const stop = await api()
+      .post(`/api/trips/${trip.id}/stops`)
+      .set(auth(token))
+      .send({ cityId: city.id, startDate: DATES.start, endDate: DATES.day2 });
+
+    const res = await api()
+      .patch(`/api/trips/${trip.id}/stops/${stop.body.id}`)
+      .set(auth(token))
+      .send({ startDate: '2026-06-04' });
+
+    expect(res.status).toBe(400);
+  });
+});

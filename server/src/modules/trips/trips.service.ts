@@ -67,7 +67,18 @@ export async function createTrip(userId: string, data: Prisma.TripUncheckedCreat
 }
 
 export async function updateTrip(tripId: string, userId: string, data: Prisma.TripUpdateInput) {
-  await getOwnedTrip(tripId, userId);
+  const current = await getOwnedTrip(tripId, userId);
+
+  // A partial update can send just one date, so the range has to be checked
+  // against the merged value rather than against the request body alone.
+  const startDate = (data.startDate as Date | undefined) ?? current.startDate;
+  const endDate = (data.endDate as Date | undefined) ?? current.endDate;
+  if (endDate < startDate) {
+    throw ApiError.badRequest('Validation failed', {
+      body: [{ path: 'endDate', message: 'endDate must be on or after startDate' }],
+    });
+  }
+
   return prisma.trip.update({ where: { id: tripId }, data, include: tripInclude });
 }
 
