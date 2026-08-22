@@ -24,7 +24,15 @@ export async function makeUser(
   return { user, token: signToken({ sub: user.id, role: user.role }) };
 }
 
-export function makeCity(overrides: Partial<{ name: string; country: string; costIndex: number; popularity: number; region: string }> = {}) {
+export function makeCity(
+  overrides: Partial<{
+    name: string;
+    country: string;
+    costIndex: number;
+    popularity: number;
+    region: string;
+  }> = {},
+) {
   return prisma.city.create({
     data: {
       name: overrides.name ?? `City-${Math.random().toString(36).slice(2, 8)}`,
@@ -38,7 +46,12 @@ export function makeCity(overrides: Partial<{ name: string; country: string; cos
 
 export function makeActivity(
   cityId: string,
-  overrides: Partial<{ name: string; cost: number; durationMinutes: number; category: ActivityCategory }> = {},
+  overrides: Partial<{
+    name: string;
+    cost: number;
+    durationMinutes: number;
+    category: ActivityCategory;
+  }> = {},
 ) {
   return prisma.activity.create({
     data: {

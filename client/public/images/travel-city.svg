@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Abstract city journey</title><desc id="desc">A geometric illustrated city at sunset.</desc>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7d6b6"/><stop offset="1" stop-color="#d9ebe5"/></linearGradient></defs>
+  <rect width="1200" height="800" fill="url(#bg)"/><circle cx="930" cy="155" r="82" fill="#ed795c" opacity=".9"/>
+  <path d="M0 650h1200v150H0z" fill="#163c3b"/><path d="M100 345h225v305H100z" fill="#285f5b"/><path d="M350 255h190v395H350z" fill="#f2b855"/><path d="M575 405h230v245H575z" fill="#e97759"/><path d="M835 300h250v350H835z" fill="#3e7c74"/>
+  <g fill="#fff9e9" opacity=".88"><path d="M140 405h42v52h-42zM235 405h42v52h-42zM140 500h42v52h-42zM235 500h42v52h-42z"/><path d="M390 320h38v50h-38zM462 320h38v50h-38zM390 418h38v50h-38zM462 418h38v50h-38z"/><path d="M625 458h46v50h-46zM716 458h46v50h-46zM625 550h46v50h-46zM716 550h46v50h-46z"/><path d="M885 365h45v50h-45zM990 365h45v50h-45zM885 470h45v50h-45zM990 470h45v50h-45z"/></g>
+</svg>

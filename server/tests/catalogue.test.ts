@@ -44,9 +44,21 @@ describe('GET /api/activities', () => {
     const rome = await makeCity({ name: 'Rome' });
     const oslo = await makeCity({ name: 'Oslo' });
 
-    await makeActivity(rome.id, { name: 'Cheap food tour', cost: 20, category: ActivityCategory.FOOD });
-    await makeActivity(rome.id, { name: 'Pricey food tour', cost: 200, category: ActivityCategory.FOOD });
-    await makeActivity(rome.id, { name: 'Ruins walk', cost: 5, category: ActivityCategory.CULTURE });
+    await makeActivity(rome.id, {
+      name: 'Cheap food tour',
+      cost: 20,
+      category: ActivityCategory.FOOD,
+    });
+    await makeActivity(rome.id, {
+      name: 'Pricey food tour',
+      cost: 200,
+      category: ActivityCategory.FOOD,
+    });
+    await makeActivity(rome.id, {
+      name: 'Ruins walk',
+      cost: 5,
+      category: ActivityCategory.CULTURE,
+    });
     await makeActivity(oslo.id, { name: 'Fjord', cost: 10, category: ActivityCategory.FOOD });
 
     const res = await api().get(`/api/activities?cityId=${rome.id}&category=FOOD&maxCost=50`);

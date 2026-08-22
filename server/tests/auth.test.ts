@@ -1,6 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { api, makeUser, PASSWORD } from './helpers.js';
 import { prisma } from '../src/lib/prisma.js';
+import { outbox } from '../src/lib/mailer.js';
+
+/** Reads the reset token out of the delivered email, as a recipient would. */
+const tokenFromOutbox = () => outbox.at(-1)!.text.match(/token=([a-f0-9]+)/)![1];
+
+beforeEach(() => {
+  outbox.length = 0;
+});
 
 describe('POST /api/auth/signup', () => {
   it('creates an account and returns a token', async () => {
@@ -15,7 +23,9 @@ describe('POST /api/auth/signup', () => {
   });
 
   it('rejects a duplicate email with 409', async () => {
-    await api().post('/api/auth/signup').send({ name: 'Alice', email: 'dupe@test.dev', password: PASSWORD });
+    await api()
+      .post('/api/auth/signup')
+      .send({ name: 'Alice', email: 'dupe@test.dev', password: PASSWORD });
     const res = await api()
       .post('/api/auth/signup')
       .send({ name: 'Bob', email: 'dupe@test.dev', password: PASSWORD });
@@ -83,7 +93,7 @@ describe('password reset', () => {
 
     const forgot = await api().post('/api/auth/forgot-password').send({ email: user.email });
     expect(forgot.status).toBe(200);
-    const token = forgot.body.devResetToken;
+    const token = tokenFromOutbox();
     expect(token).toBeTypeOf('string');
 
     const reset = await api()
@@ -106,13 +116,14 @@ describe('password reset', () => {
   it('does not reveal whether an email is registered', async () => {
     const res = await api().post('/api/auth/forgot-password').send({ email: 'ghost@test.dev' });
     expect(res.status).toBe(200);
-    expect(res.body.devResetToken).toBeUndefined();
+    expect(outbox).toHaveLength(0);
     expect(await prisma.passwordResetToken.count()).toBe(0);
   });
 
   it('rejects an expired token', async () => {
     const { user } = await makeUser({ email: 'expired@test.dev' });
-    const forgot = await api().post('/api/auth/forgot-password').send({ email: user.email });
+    await api().post('/api/auth/forgot-password').send({ email: user.email });
+    const token = tokenFromOutbox();
 
     await prisma.passwordResetToken.updateMany({
       where: { userId: user.id },
@@ -121,7 +132,7 @@ describe('password reset', () => {
 
     const res = await api()
       .post('/api/auth/reset-password')
-      .send({ token: forgot.body.devResetToken, password: 'BrandNewPass1' });
+      .send({ token, password: 'BrandNewPass1' });
     expect(res.status).toBe(400);
   });
 });

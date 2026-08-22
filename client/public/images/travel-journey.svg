@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Illustrated travel lane</title><desc id="desc">A warm editorial illustration of a winding street leading toward the horizon.</desc>
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e4eee8"/><stop offset="1" stop-color="#f4c990"/></linearGradient></defs>
+  <rect width="1200" height="1200" fill="url(#sky)"/><circle cx="600" cy="225" r="90" fill="#ed7658" opacity=".92"/>
+  <path d="M0 270 370 390v810H0Z" fill="#153d3b"/><path d="m1200 240-370 155v805h370Z" fill="#235c57"/>
+  <path d="M370 390h170v810H370z" fill="#cf6a50"/><path d="M660 365h170v835H660z" fill="#e7b652"/>
+  <path d="M510 1200c22-348 44-544 90-803 50 263 80 462 103 803Z" fill="#f7efe0"/>
+  <g fill="#f8efd9" opacity=".88"><path d="M65 420h92v120H65zM214 485h90v118h-90zM65 675h92v120H65zM214 745h90v118h-90z"/><path d="M900 430h100v125H900zM1050 370h92v122h-92zM900 700h100v125H900zM1050 625h92v122h-92z"/></g>
+  <path d="M555 905h92l28 295H527Z" fill="#173b39" opacity=".94"/><circle cx="600" cy="830" r="52" fill="#173b39"/>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Abstract coastal landscape</title>
+  <desc id="desc">A warm illustrated coastline with blue water and green hills.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dceee9"/><stop offset="1" stop-color="#f7e8c9"/></linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5fb4ad"/><stop offset="1" stop-color="#176d6c"/></linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <circle cx="1215" cy="190" r="92" fill="#f3b64d" opacity=".88"/>
+  <path d="M0 510C260 420 430 482 650 430s379-51 563 15c160 58 278 8 387-37v592H0Z" fill="#315e54"/>
+  <path d="M0 620c250-100 424-24 630-62 263-49 432 31 615 42 142 9 245-20 355-75v475H0Z" fill="#173f3d"/>
+  <path d="M690 489c172 62 243 159 261 259 22 119 176 178 349 252h300V458c-159 65-298 57-438 18-171-47-319-45-472 13Z" fill="url(#sea)"/>
+  <path d="M812 548c155 55 180 153 241 222 71 80 196 113 370 173" fill="none" stroke="#f9f2dc" stroke-width="22" opacity=".75"/>
+  <path d="M82 654c175-89 370-98 548-47" fill="none" stroke="#98b99e" stroke-width="17" opacity=".55"/>
+</svg>

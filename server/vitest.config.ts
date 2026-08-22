@@ -17,6 +17,14 @@ export default defineConfig({
       JWT_SECRET: 'test-secret-value-not-used-in-production',
       JWT_EXPIRES_IN: '1h',
       CLIENT_URL: 'http://localhost:5173',
+      // Limiters are module-level singletons shared by every test file, so they
+      // are raised here and exercised directly in tests/rateLimit.test.ts.
+      AUTH_RATE_LIMIT_MAX: '100000',
+      SIGNUP_RATE_LIMIT_MAX: '100000',
+      RESET_RATE_LIMIT_MAX: '100000',
+      UPLOAD_DIR: 'tests/.uploads',
+      MAIL_TRANSPORT: 'memory',
+      APP_URL: 'http://localhost:5173',
     },
     include: ['tests/**/*.test.ts'],
   },

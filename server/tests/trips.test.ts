@@ -38,7 +38,9 @@ describe('POST /api/trips', () => {
   });
 
   it('requires authentication', async () => {
-    const res = await api().post('/api/trips').send({ name: 'X', startDate: DATES.start, endDate: DATES.end });
+    const res = await api()
+      .post('/api/trips')
+      .send({ name: 'X', startDate: DATES.start, endDate: DATES.end });
     expect(res.status).toBe(401);
   });
 });
@@ -102,7 +104,9 @@ describe('trip ownership', () => {
     const stranger = await makeUser();
     const trip = await makeTrip(owner.user.id);
 
-    expect((await api().delete(`/api/trips/${trip.id}`).set(auth(stranger.token))).status).toBe(403);
+    expect((await api().delete(`/api/trips/${trip.id}`).set(auth(stranger.token))).status).toBe(
+      403,
+    );
     expect((await api().delete(`/api/trips/${trip.id}`).set(auth(owner.token))).status).toBe(204);
   });
 
@@ -118,14 +122,23 @@ describe('POST /api/trips/:id/share', () => {
     const { user, token } = await makeUser();
     const trip = await makeTrip(user.id);
 
-    const on = await api().post(`/api/trips/${trip.id}/share`).set(auth(token)).send({ isPublic: true });
+    const on = await api()
+      .post(`/api/trips/${trip.id}/share`)
+      .set(auth(token))
+      .send({ isPublic: true });
     expect(on.status).toBe(200);
     expect(on.body.publicSlug).toBeTypeOf('string');
 
-    const off = await api().post(`/api/trips/${trip.id}/share`).set(auth(token)).send({ isPublic: false });
+    const off = await api()
+      .post(`/api/trips/${trip.id}/share`)
+      .set(auth(token))
+      .send({ isPublic: false });
     expect(off.body.isPublic).toBe(false);
 
-    const again = await api().post(`/api/trips/${trip.id}/share`).set(auth(token)).send({ isPublic: true });
+    const again = await api()
+      .post(`/api/trips/${trip.id}/share`)
+      .set(auth(token))
+      .send({ isPublic: true });
     expect(again.body.publicSlug).toBe(on.body.publicSlug);
   });
 });
@@ -195,5 +208,78 @@ describe('PATCH date-range validation', () => {
       .send({ startDate: '2026-06-04' });
 
     expect(res.status).toBe(400);
+  });
+});
+
+describe('trip list buckets', () => {
+  /** Builds a trip spanning today+from .. today+to. */
+  async function tripSpanning(userId: string, name: string, from: number, to: number) {
+    const day = (offset: number) => {
+      const d = new Date();
+      d.setUTCHours(0, 0, 0, 0);
+      d.setUTCDate(d.getUTCDate() + offset);
+      return d;
+    };
+    return makeTrip(userId, { name, startDate: day(from), endDate: day(to) });
+  }
+
+  it('splits ongoing, upcoming and past into disjoint buckets', async () => {
+    const { user, token } = await makeUser();
+    await tripSpanning(user.id, 'Happening now', -2, 2);
+    await tripSpanning(user.id, 'Starts later', 10, 20);
+    await tripSpanning(user.id, 'Already done', -20, -10);
+
+    const names = async (filter: string) =>
+      (await api().get(`/api/trips?filter=${filter}`).set(auth(token))).body.items.map(
+        (t: { name: string }) => t.name,
+      );
+
+    expect(await names('ongoing')).toEqual(['Happening now']);
+    expect(await names('upcoming')).toEqual(['Starts later']);
+    expect(await names('past')).toEqual(['Already done']);
+    expect((await names('all')).sort()).toHaveLength(3);
+  });
+
+  it('counts a trip starting today as ongoing, not upcoming', async () => {
+    const { user, token } = await makeUser();
+    await tripSpanning(user.id, 'Starts today', 0, 3);
+
+    const upcoming = await api().get('/api/trips?filter=upcoming').set(auth(token));
+    const ongoing = await api().get('/api/trips?filter=ongoing').set(auth(token));
+
+    expect(upcoming.body.total).toBe(0);
+    expect(ongoing.body.total).toBe(1);
+  });
+
+  it('rejects an unknown filter', async () => {
+    const { token } = await makeUser();
+    expect((await api().get('/api/trips?filter=someday').set(auth(token))).status).toBe(400);
+  });
+});
+
+describe('trip list payload', () => {
+  it('carries per-stop activity ids so cards can count experiences', async () => {
+    const { user, token } = await makeUser();
+    const trip = await makeTrip(user.id);
+    const city = await makeCity({ name: 'Porto Card' });
+
+    const stop = await api()
+      .post(`/api/trips/${trip.id}/stops`)
+      .set(auth(token))
+      .send({ cityId: city.id, startDate: DATES.start, endDate: DATES.day2 });
+
+    for (const name of ['Port tasting', 'River walk']) {
+      await api()
+        .post(`/api/trips/${trip.id}/stops/${stop.body.id}/activities`)
+        .set(auth(token))
+        .send({ name });
+    }
+
+    const [listed] = (await api().get('/api/trips').set(auth(token))).body.items;
+
+    expect(listed.stops).toHaveLength(1);
+    expect(listed.stops[0].city.name).toBe('Porto Card');
+    // The dashboard sums this; without it every card reported zero.
+    expect(listed.stops[0].activities).toHaveLength(2);
   });
 });

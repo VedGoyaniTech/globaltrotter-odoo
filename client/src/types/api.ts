@@ -18,8 +18,13 @@ export type ExpenseCategory = 'TRANSPORT' | 'STAY' | 'ACTIVITIES' | 'MEALS' | 'O
 
 export interface User {
   id: string;
+  /** Display name — derived from firstName + lastName when signup sends those. */
   name: string;
+  firstName: string | null;
+  lastName: string | null;
   email: string;
+  phone: string | null;
+  bio: string | null;
   avatarUrl: string | null;
   city: string | null;
   country: string | null;
@@ -72,6 +77,8 @@ export interface TripStop {
   startDate: string;
   endDate: string;
   orderIndex: number;
+  /** Optional planning target for this leg. Decimal — arrives as a string. */
+  budget: string | null;
   notes: string | null;
   city: City;
   activities: TripActivity[];
@@ -118,6 +125,74 @@ export interface TimelineDay {
   cityId: string | null;
   cityName: string | null;
   activities: TripActivity[];
+}
+
+/**
+ * What `GET /api/trips` actually returns. The list response is deliberately
+ * lighter than `Trip`: stops carry only their city and activity ids, and there
+ * are no expenses. Type list responses with this rather than `Trip`, or fields
+ * that were never sent will read as `undefined` at runtime.
+ */
+export interface TripListItem {
+  id: string;
+  userId: string;
+  name: string;
+  description: string | null;
+  startDate: string;
+  endDate: string;
+  coverPhotoUrl: string | null;
+  budgetLimit: string | null;
+  isPublic: boolean;
+  publicSlug: string | null;
+  createdAt: string;
+  _count: { stops: number };
+  stops: {
+    id: string;
+    city: Pick<City, 'id' | 'name' | 'country'>;
+    activities: { id: string }[];
+  }[];
+}
+
+/** Trip list buckets. Disjoint: a trip starting today is `ongoing`, not `upcoming`. */
+export type TripFilter = 'all' | 'upcoming' | 'ongoing' | 'past';
+
+/** One card in the community feed — `GET /api/public/trips`. */
+export interface PublicTripCard {
+  id: string;
+  name: string;
+  description: string | null;
+  startDate: string;
+  endDate: string;
+  coverPhotoUrl: string | null;
+  publicSlug: string;
+  createdAt: string;
+  user: Pick<User, 'id' | 'name' | 'avatarUrl'>;
+  stopCount: number;
+  cities: Pick<City, 'id' | 'name' | 'country'>[];
+}
+
+/** `GET /api/trips/summary` — dashboard counts and budget highlights. */
+export interface TripSummary {
+  counts: { total: number; upcoming: number; ongoing: number; past: number };
+  nextTrip: {
+    id: string;
+    name: string;
+    startDate: string;
+    daysUntil: number;
+    total: number;
+  } | null;
+  budget: {
+    /** Upcoming and ongoing trips only — finished trips are excluded. */
+    plannedTotal: number;
+    byCategory: Record<ExpenseCategory, number>;
+    overBudgetTrips: number;
+    mostExpensive: { id: string; name: string; total: number } | null;
+  };
+}
+
+export interface CountryOption {
+  country: string;
+  cities: number;
 }
 
 export interface Paginated<T> {

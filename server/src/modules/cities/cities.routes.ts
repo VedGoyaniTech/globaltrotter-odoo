@@ -5,6 +5,7 @@ import { prisma } from '../../lib/prisma.js';
 import { ApiError } from '../../lib/errors.js';
 import { asyncHandler } from '../../lib/asyncHandler.js';
 import { validate } from '../../middleware/validate.js';
+import { optionalAuth } from '../../middleware/auth.js';
 
 export const citiesRouter = Router();
 
@@ -33,7 +34,11 @@ citiesRouter.get(
     };
 
     const orderBy: Prisma.CityOrderByWithRelationInput =
-      sort === 'name' ? { name: 'asc' } : sort === 'costIndex' ? { costIndex: 'asc' } : { popularity: 'desc' };
+      sort === 'name'
+        ? { name: 'asc' }
+        : sort === 'costIndex'
+          ? { costIndex: 'asc' }
+          : { popularity: 'desc' };
 
     const [items, total] = await Promise.all([
       prisma.city.findMany({
@@ -60,6 +65,39 @@ citiesRouter.get(
       orderBy: { country: 'asc' },
     });
     res.json(rows.map((r) => ({ country: r.country, cities: r._count.country })));
+  }),
+);
+
+// GET /api/cities/recommended - "recommended destinations" on the dashboard.
+// Declared before /:id so "recommended" is not read as an id.
+citiesRouter.get(
+  '/recommended',
+  optionalAuth,
+  validate({ query: z.object({ limit: z.coerce.number().int().min(1).max(24).default(6) }) }),
+  asyncHandler(async (req, res) => {
+    const { limit } = req.query as unknown as { limit: number };
+
+    // Signed in, the list becomes suggestions: popular cities the traveller has
+    // not already saved or planned a stop in. Anonymously it is just the top list.
+    const exclude: Prisma.CityWhereInput = req.user
+      ? {
+          NOT: {
+            OR: [
+              { savedDestinations: { some: { userId: req.user.id } } },
+              { tripStops: { some: { trip: { userId: req.user.id } } } },
+            ],
+          },
+        }
+      : {};
+
+    const cities = await prisma.city.findMany({
+      where: exclude,
+      orderBy: [{ popularity: 'desc' }, { name: 'asc' }],
+      take: limit,
+      include: { _count: { select: { activities: true } } },
+    });
+
+    res.json(cities);
   }),
 );
 

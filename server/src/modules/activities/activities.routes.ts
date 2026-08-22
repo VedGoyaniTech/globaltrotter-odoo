@@ -36,7 +36,11 @@ activitiesRouter.get(
     };
 
     const orderBy: Prisma.ActivityOrderByWithRelationInput =
-      sort === 'cost' ? { cost: 'asc' } : sort === 'duration' ? { durationMinutes: 'asc' } : { name: 'asc' };
+      sort === 'cost'
+        ? { cost: 'asc' }
+        : sort === 'duration'
+          ? { durationMinutes: 'asc' }
+          : { name: 'asc' };
 
     const [items, total] = await Promise.all([
       prisma.activity.findMany({

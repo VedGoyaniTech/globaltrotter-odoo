@@ -7,6 +7,7 @@ import { getOwnedTrip } from '../trips/trips.service.js';
 import {
   createStopSchema,
   createTripActivitySchema,
+  reorderActivitiesSchema,
   reorderStopsSchema,
   updateStopSchema,
   updateTripActivitySchema,
@@ -185,6 +186,39 @@ stopsRouter.post(
           cost: (body.cost as number) ?? defaults?.cost ?? 0,
           orderIndex: (last?.orderIndex ?? -1) + 1,
         },
+      }),
+    );
+  }),
+);
+
+// Declared before /:stopId/activities/:activityId so "reorder" is not read as an id.
+stopsRouter.put(
+  '/:stopId/activities/reorder',
+  validate({ body: reorderActivitiesSchema }),
+  asyncHandler(async (req, res) => {
+    const { tripId, stopId } = req.params as Params;
+    await loadStop(tripId, stopId!);
+    const { activityIds } = req.body as { activityIds: string[] };
+
+    const existing = await prisma.tripActivity.findMany({
+      where: { tripStopId: stopId },
+      select: { id: true },
+    });
+    const known = new Set(existing.map((a) => a.id));
+    if (activityIds.length !== known.size || activityIds.some((id) => !known.has(id))) {
+      throw ApiError.badRequest('activityIds must list every activity on this stop exactly once');
+    }
+
+    await prisma.$transaction(
+      activityIds.map((id, i) =>
+        prisma.tripActivity.update({ where: { id }, data: { orderIndex: i } }),
+      ),
+    );
+
+    res.json(
+      await prisma.tripActivity.findMany({
+        where: { tripStopId: stopId },
+        orderBy: { orderIndex: 'asc' },
       }),
     );
   }),

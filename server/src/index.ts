@@ -1,6 +1,9 @@
 import { createApp } from './app.js';
 import { env } from './config/env.js';
 import { prisma } from './lib/prisma.js';
+import { warnIfMailMisconfigured } from './lib/mailer.js';
+
+warnIfMailMisconfigured();
 
 const app = createApp();
 

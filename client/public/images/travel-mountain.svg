@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Abstract mountain route</title><desc id="desc">A layered illustrated mountain range beneath a golden sun.</desc>
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d8ece9"/><stop offset="1" stop-color="#fff1d6"/></linearGradient></defs>
+  <rect width="1200" height="800" fill="url(#sky)"/><circle cx="250" cy="190" r="88" fill="#efb648"/>
+  <path d="m0 590 280-292 179 172 181-245 321 365 239-214v424H0Z" fill="#6b9282"/>
+  <path d="m0 664 244-204 210 181 199-269 222 244 170-150 155 121v213H0Z" fill="#315d56"/>
+  <path d="m0 735 213-139 194 100 202-167 173 134 188-120 230 133v124H0Z" fill="#153d3b"/>
+  <path d="M458 470 640 225l99 112-81-51-58 84-55-31Z" fill="#fff8e8" opacity=".9"/>
+</svg>

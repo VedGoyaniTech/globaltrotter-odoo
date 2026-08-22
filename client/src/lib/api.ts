@@ -42,8 +42,30 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return body as T;
 }
 
+/**
+ * Multipart upload for the avatar and trip-cover endpoints.
+ * Content-Type is deliberately omitted so the browser sets the multipart
+ * boundary itself — setting it by hand produces a request multer cannot parse.
+ */
+async function upload<T>(path: string, file: File | Blob): Promise<T> {
+  const token = auth.get();
+  const body = new FormData();
+  body.append('image', file);
+
+  const res = await fetch(`/api${path}`, {
+    method: 'POST',
+    body,
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) throw new ApiError(res.status, payload.error ?? res.statusText, payload.details);
+  return payload as T;
+}
+
 export const api = {
-  get: <T>(path: string) => request<T>(path),
+  get: <T>(path: string, init?: RequestInit) => request<T>(path, init),
+  upload,
   post: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'POST', body: JSON.stringify(body ?? {}) }),
   patch: <T>(path: string, body?: unknown) =>
