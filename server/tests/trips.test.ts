@@ -243,3 +243,30 @@ describe('trip list buckets', () => {
     expect((await api().get('/api/trips?filter=someday').set(auth(token))).status).toBe(400);
   });
 });
+
+describe('trip list payload', () => {
+  it('carries per-stop activity ids so cards can count experiences', async () => {
+    const { user, token } = await makeUser();
+    const trip = await makeTrip(user.id);
+    const city = await makeCity({ name: 'Porto Card' });
+
+    const stop = await api()
+      .post(`/api/trips/${trip.id}/stops`)
+      .set(auth(token))
+      .send({ cityId: city.id, startDate: DATES.start, endDate: DATES.day2 });
+
+    for (const name of ['Port tasting', 'River walk']) {
+      await api()
+        .post(`/api/trips/${trip.id}/stops/${stop.body.id}/activities`)
+        .set(auth(token))
+        .send({ name });
+    }
+
+    const [listed] = (await api().get('/api/trips').set(auth(token))).body.items;
+
+    expect(listed.stops).toHaveLength(1);
+    expect(listed.stops[0].city.name).toBe('Porto Card');
+    // The dashboard sums this; without it every card reported zero.
+    expect(listed.stops[0].activities).toHaveLength(2);
+  });
+});

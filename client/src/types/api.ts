@@ -127,6 +127,32 @@ export interface TimelineDay {
   activities: TripActivity[];
 }
 
+/**
+ * What `GET /api/trips` actually returns. The list response is deliberately
+ * lighter than `Trip`: stops carry only their city and activity ids, and there
+ * are no expenses. Type list responses with this rather than `Trip`, or fields
+ * that were never sent will read as `undefined` at runtime.
+ */
+export interface TripListItem {
+  id: string;
+  userId: string;
+  name: string;
+  description: string | null;
+  startDate: string;
+  endDate: string;
+  coverPhotoUrl: string | null;
+  budgetLimit: string | null;
+  isPublic: boolean;
+  publicSlug: string | null;
+  createdAt: string;
+  _count: { stops: number };
+  stops: {
+    id: string;
+    city: Pick<City, 'id' | 'name' | 'country'>;
+    activities: { id: string }[];
+  }[];
+}
+
 /** Trip list buckets. Disjoint: a trip starting today is `ongoing`, not `upcoming`. */
 export type TripFilter = 'all' | 'upcoming' | 'ongoing' | 'past';
 

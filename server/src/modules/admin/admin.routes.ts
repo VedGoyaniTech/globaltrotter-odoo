@@ -39,10 +39,12 @@ adminRouter.get(
       where: { id: { in: topCityRows.map((r) => r.cityId) } },
       select: { id: true, name: true, country: true },
     });
-    const topCities = topCityRows.map((r) => ({
-      ...topCityDetails.find((c) => c.id === r.cityId),
-      stops: r._count.cityId,
-    }));
+    // Spreading a missing city would emit a half-formed row, so drop any city
+    // that disappeared between the groupBy and the lookup.
+    const topCities = topCityRows.flatMap((r) => {
+      const city = topCityDetails.find((c) => c.id === r.cityId);
+      return city ? [{ ...city, stops: r._count.cityId }] : [];
+    });
 
     const topActivityRows = await prisma.tripActivity.groupBy({
       by: ['name'],

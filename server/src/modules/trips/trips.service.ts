@@ -65,7 +65,13 @@ export async function listTrips(
         _count: { select: { stops: true } },
         stops: {
           orderBy: { orderIndex: 'asc' },
-          select: { city: { select: { id: true, name: true, country: true } } },
+          select: {
+            id: true,
+            city: { select: { id: true, name: true, country: true } },
+            // Ids only. The trip cards count experiences per stop, and without
+            // this the count silently renders as zero.
+            activities: { select: { id: true } },
+          },
         },
       },
     }),

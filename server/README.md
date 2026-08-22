@@ -79,6 +79,10 @@ stored value too, so a partial `PATCH` cannot invert an existing range.
 `filter` buckets are disjoint: `upcoming` is *not yet started*, `ongoing` is *running
 today*, `past` is *finished*. A trip starting today counts as `ongoing`.
 
+`GET /trips` returns a **lighter shape than `GET /trips/:tripId`** — each stop carries only
+its `id`, `city` and `activities: [{ id }]` (enough to count experiences on a card), and
+there are no `expenses`. Type it as `TripListItem`, not `Trip`.
+
 ## Stops — `/trips/:tripId/stops`
 
 | Method | Path                             | Notes                                        |
