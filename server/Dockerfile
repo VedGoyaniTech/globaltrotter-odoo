@@ -10,7 +10,10 @@ RUN npm ci --workspace server --include-workspace-root
 COPY server ./server
 RUN npm run db:generate -w server && npm run build -w server
 
-# Drop dev dependencies, then keep the generated Prisma client.
+# Drop dev dependencies, then keep the generated Prisma client. The Prisma CLI
+# is a production dependency on purpose: the container runs `migrate deploy` on
+# boot, and if the CLI were pruned `npx` would fetch whatever version is latest
+# at run time — which is how a pinned schema ends up rejected by a newer major.
 RUN npm prune --omit=dev --workspace server --include-workspace-root \
   && npm run db:generate -w server
 
@@ -18,7 +21,11 @@ FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
+# npm hoists most packages to the root, but anything it chooses to nest lands
+# in server/node_modules. Both are copied, or the runtime is missing packages
+# that were present during the build.
 COPY --from=build /repo/node_modules ./node_modules
+COPY --from=build /repo/server/node_modules ./node_modules
 COPY --from=build /repo/server/dist ./dist
 COPY --from=build /repo/server/prisma ./prisma
 COPY --from=build /repo/server/package.json ./package.json

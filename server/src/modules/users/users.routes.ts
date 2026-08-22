@@ -7,6 +7,7 @@ import { validate } from '../../middleware/validate.js';
 import { publicUrlFor, removeUploaded, uploadImage } from '../../middleware/upload.js';
 import { ApiError } from '../../lib/errors.js';
 import { hashPassword, verifyPassword } from '../../lib/password.js';
+import { httpUrl } from '../../lib/validation.js';
 
 export const usersRouter = Router();
 usersRouter.use(requireAuth);
@@ -22,7 +23,7 @@ const updateProfileSchema = z.object({
     .nullable()
     .optional(),
   bio: z.string().trim().max(500).nullable().optional(),
-  avatarUrl: z.string().url().max(500).nullable().optional(),
+  avatarUrl: httpUrl().nullable().optional(),
   city: z.string().trim().max(80).nullable().optional(),
   country: z.string().trim().max(80).nullable().optional(),
   language: z.string().trim().min(2).max(10).optional(),

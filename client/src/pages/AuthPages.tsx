@@ -3,8 +3,29 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { ApiError, api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { Button, ErrorNotice, Field, TextareaField } from '../components/ui';
+import { DriftWall, type DriftWallItem } from '../components/DriftWall';
 import { Icon } from '../components/Icon';
-import { localVisuals, travelBackground, travelVisuals } from '../lib/assets';
+import { travelVisuals } from '../lib/assets';
+
+const wallImage = (source: string) => source.replace(/w=\d+/, 'w=640').replace(/q=\d+/, 'q=78');
+
+const authWallItems: DriftWallItem[] = [
+  { image: wallImage(travelVisuals.hero), title: 'Maldives · open water' },
+  { image: wallImage(travelVisuals.city), title: 'Paris · morning light' },
+  { image: wallImage(travelVisuals.culture), title: 'Kyoto · quiet rituals' },
+  { image: wallImage(travelVisuals.alpine), title: 'The Alps · higher ground' },
+  { image: wallImage(travelVisuals.coast), title: 'Amalfi · coastal days' },
+  { image: wallImage(travelVisuals.beach), title: 'Bali · blue horizons' },
+  { image: wallImage(travelVisuals.street), title: 'Lisbon · hidden lanes' },
+  { image: wallImage(travelVisuals.mountain), title: 'Iceland · wild roads' },
+  { image: wallImage(travelVisuals.activity), title: 'Somewhere new · begin' },
+  {
+    image: wallImage(
+      'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1600&q=84',
+    ),
+    title: 'Jaipur · colour stories',
+  },
+];
 
 function AuthLayout({
   children,
@@ -17,18 +38,26 @@ function AuthLayout({
 }) {
   return (
     <main className="auth-layout">
-      <section
-        className="auth-visual"
-        style={{ backgroundImage: travelBackground(travelVisuals.auth, localVisuals.journey) }}
-      >
-        <Link className="brand brand--light" to="/">
+      <section className="auth-visual">
+        <DriftWall
+          className="auth-visual__wall"
+          items={authWallItems}
+          columns={5}
+          tileWidth={178}
+          tileHeight={122}
+          gap={14}
+          speed={24}
+        />
+        <div className="auth-visual__veil" />
+        <Link className="brand brand--light auth-visual__brand" to="/">
           <span className="brand__mark">G</span>
           <span>GlobeTrotter</span>
         </Link>
-        <div>
+        <div className="auth-visual__copy">
           <p className="eyebrow">Your world, thoughtfully planned</p>
           <blockquote>“{quote}”</blockquote>
           <p>One beautiful place for every city, story, and shared adventure.</p>
+          <span>Move through the wall to explore.</span>
         </div>
       </section>
       <section className="auth-panel">
@@ -49,8 +78,8 @@ function AuthLayout({
 export function LoginPage() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('demo@globetrotter.app');
-  const [password, setPassword] = useState('Password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -112,10 +141,6 @@ export function LoginPage() {
         <p className="auth-switch">
           New to GlobeTrotter? <Link to="/signup">Create an account</Link>
         </p>
-        <div className="demo-note">
-          <strong>Demo ready</strong>
-          <span>The seeded traveler credentials are prefilled for the hackathon demo.</span>
-        </div>
       </div>
     </AuthLayout>
   );

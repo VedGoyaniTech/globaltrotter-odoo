@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { httpUrl } from '../../lib/validation.js';
 
 const isoDate = z
   .string()
@@ -13,7 +14,7 @@ export const createTripSchema = z
     description: z.string().trim().max(2000).optional(),
     startDate: isoDate,
     endDate: isoDate,
-    coverPhotoUrl: z.string().url().max(500).optional(),
+    coverPhotoUrl: httpUrl().optional(),
     budgetLimit: z.coerce.number().min(0).optional(),
   })
   .refine((v) => v.endDate >= v.startDate, {
@@ -27,7 +28,7 @@ export const updateTripSchema = z
     description: z.string().trim().max(2000).nullable().optional(),
     startDate: isoDate.optional(),
     endDate: isoDate.optional(),
-    coverPhotoUrl: z.string().url().max(500).nullable().optional(),
+    coverPhotoUrl: httpUrl().nullable().optional(),
     budgetLimit: z.coerce.number().min(0).nullable().optional(),
   })
   .refine((v) => !v.startDate || !v.endDate || v.endDate >= v.startDate, {
