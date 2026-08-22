@@ -171,6 +171,25 @@ export interface PublicTripCard {
   cities: Pick<City, 'id' | 'name' | 'country'>[];
 }
 
+/** `GET /api/trips/summary` — dashboard counts and budget highlights. */
+export interface TripSummary {
+  counts: { total: number; upcoming: number; ongoing: number; past: number };
+  nextTrip: {
+    id: string;
+    name: string;
+    startDate: string;
+    daysUntil: number;
+    total: number;
+  } | null;
+  budget: {
+    /** Upcoming and ongoing trips only — finished trips are excluded. */
+    plannedTotal: number;
+    byCategory: Record<ExpenseCategory, number>;
+    overBudgetTrips: number;
+    mostExpensive: { id: string; name: string; total: number } | null;
+  };
+}
+
 export interface CountryOption {
   country: string;
   cities: number;

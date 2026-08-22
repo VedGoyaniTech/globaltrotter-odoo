@@ -126,7 +126,10 @@ describe('/api/users/me', () => {
 
   it('rejects an invalid avatar url', async () => {
     const { token } = await makeUser();
-    const res = await api().patch('/api/users/me').set(auth(token)).send({ avatarUrl: 'not-a-url' });
+    const res = await api()
+      .patch('/api/users/me')
+      .set(auth(token))
+      .send({ avatarUrl: 'not-a-url' });
     expect(res.status).toBe(400);
   });
 
@@ -180,6 +183,8 @@ describe('admin list pagination', () => {
 
   it('rejects an oversized limit', async () => {
     const admin = await makeUser({ role: Role.ADMIN });
-    expect((await api().get('/api/admin/users?limit=5000').set(auth(admin.token))).status).toBe(400);
+    expect((await api().get('/api/admin/users?limit=5000').set(auth(admin.token))).status).toBe(
+      400,
+    );
   });
 });

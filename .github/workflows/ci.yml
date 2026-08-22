@@ -60,6 +60,9 @@ jobs:
           --to-schema-datamodel ./prisma/schema.prisma
           --exit-code
 
+      - name: Format check
+        run: npm run format:check -w server
+
       - name: Typecheck
         run: npm run typecheck -w server
 

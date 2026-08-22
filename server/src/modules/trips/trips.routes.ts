@@ -40,6 +40,15 @@ tripsRouter.post(
   }),
 );
 
+// GET /api/trips/summary - Dashboard budget highlights. Declared before
+// /:tripId so "summary" is not read as a trip id.
+tripsRouter.get(
+  '/summary',
+  asyncHandler(async (req, res) => {
+    res.json(await service.getDashboardSummary(req.user!.id));
+  }),
+);
+
 tripsRouter.get(
   '/:tripId',
   asyncHandler(async (req, res) => {

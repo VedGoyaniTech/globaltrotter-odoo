@@ -16,7 +16,9 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\" \"prisma/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\" \"prisma/**/*.ts\""
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -46,6 +48,7 @@
     "@types/multer": "^1.4.13",
     "@types/node": "^22.10.5",
     "@types/supertest": "^6.0.3",
+    "prettier": "^3.9.6",
     "prisma": "^6.2.1",
     "supertest": "^7.2.2",
     "tsx": "^4.19.2",

@@ -4,9 +4,13 @@ import { api, DATES, makeCity, makeTrip, makeUser } from './helpers.js';
 const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
 
 /** Creates a trip with one stop and optionally publishes it. */
-async function tripWith(
-  opts: { name: string; city: string; country: string; isPublic: boolean; owner?: string },
-) {
+async function tripWith(opts: {
+  name: string;
+  city: string;
+  country: string;
+  isPublic: boolean;
+  owner?: string;
+}) {
   const { user, token } = await makeUser({ name: opts.owner ?? 'Owner' });
   const trip = await makeTrip(user.id, { name: opts.name });
   const city = await makeCity({ name: opts.city, country: opts.country });
@@ -35,7 +39,13 @@ describe('GET /api/public/trips', () => {
   });
 
   it('returns a card-shaped payload without leaking the owner id linkage', async () => {
-    await tripWith({ name: 'Coast Run', city: 'Split', country: 'Croatia', isPublic: true, owner: 'Mara' });
+    await tripWith({
+      name: 'Coast Run',
+      city: 'Split',
+      country: 'Croatia',
+      isPublic: true,
+      owner: 'Mara',
+    });
 
     const [item] = (await api().get('/api/public/trips')).body.items;
 
@@ -58,7 +68,12 @@ describe('GET /api/public/trips', () => {
   });
 
   it('searches by a city on the itinerary, not just the trip name', async () => {
-    await tripWith({ name: 'Unrelated Title', city: 'Lucerne', country: 'Switzerland', isPublic: true });
+    await tripWith({
+      name: 'Unrelated Title',
+      city: 'Lucerne',
+      country: 'Switzerland',
+      isPublic: true,
+    });
     await tripWith({ name: 'Other', city: 'Porto', country: 'Portugal', isPublic: true });
 
     const res = await api().get('/api/public/trips?q=lucerne');
@@ -86,7 +101,10 @@ describe('GET /api/public/trips', () => {
 
   it('drops a trip from the feed once sharing is switched off', async () => {
     const { token, trip } = await tripWith({
-      name: 'Temporary', city: 'Tallinn', country: 'Estonia', isPublic: true,
+      name: 'Temporary',
+      city: 'Tallinn',
+      country: 'Estonia',
+      isPublic: true,
     });
     expect((await api().get('/api/public/trips')).body.total).toBe(1);
 
@@ -97,9 +115,13 @@ describe('GET /api/public/trips', () => {
   it('sorts by soonest departure', async () => {
     const a = await tripWith({ name: 'Later', city: 'Oslo', country: 'Norway', isPublic: true });
     const b = await tripWith({ name: 'Sooner', city: 'Nice', country: 'France', isPublic: true });
-    await api().patch(`/api/trips/${a.trip.id}`).set(auth(a.token))
+    await api()
+      .patch(`/api/trips/${a.trip.id}`)
+      .set(auth(a.token))
       .send({ startDate: '2027-01-01', endDate: '2027-01-10' });
-    await api().patch(`/api/trips/${b.trip.id}`).set(auth(b.token))
+    await api()
+      .patch(`/api/trips/${b.trip.id}`)
+      .set(auth(b.token))
       .send({ startDate: '2026-01-01', endDate: '2026-01-10' });
 
     const res = await api().get('/api/public/trips?sort=soonest');

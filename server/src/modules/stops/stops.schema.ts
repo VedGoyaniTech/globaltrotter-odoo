@@ -41,8 +41,16 @@ export const createTripActivitySchema = z.object({
   name: z.string().trim().min(1).max(160).optional(),
   notes: z.string().trim().max(1000).optional(),
   scheduledDate: isoDate.optional(),
-  startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Expected HH:mm').optional(),
-  durationMinutes: z.coerce.number().int().min(0).max(24 * 60).optional(),
+  startTime: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Expected HH:mm')
+    .optional(),
+  durationMinutes: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .max(24 * 60)
+    .optional(),
   cost: z.coerce.number().min(0).optional(),
 });
 

@@ -6,7 +6,7 @@
   <a href="https://github.com/VedGoyaniTech/globaltrotter-odoo/actions/workflows/ci.yml">
     <img src="https://github.com/VedGoyaniTech/globaltrotter-odoo/actions/workflows/ci.yml/badge.svg" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/tests-105%20passing-2BB3A3?labelColor=221A28" alt="105 tests passing">
+  <img src="https://img.shields.io/badge/tests-124%20passing-2BB3A3?labelColor=221A28" alt="124 tests passing">
   <img src="https://img.shields.io/badge/Node-20%2B-714B67?labelColor=221A28" alt="Node 20+">
   <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?labelColor=221A28" alt="TypeScript strict">
   <img src="https://img.shields.io/badge/PostgreSQL-16-336791?labelColor=221A28" alt="PostgreSQL 16">
@@ -23,14 +23,14 @@
 
 ## What it does
 
-| | Capability | How it works |
-| :--: | --- | --- |
-| 🗺️ | **Multi-city itineraries** | A trip is an ordered list of stops; each stop is a city with its own date range and activities. Reordering is a single transactional call. |
-| 🔎 | **City & activity discovery** | Searchable catalogue with country/region filters, a cost index, and activity filters by category, price and duration. |
-| 💸 | **Automatic budgeting** | Costs come from the itinerary itself. Add flights and hotels manually and you get category totals, a per-day curve and over-budget warnings. |
-| 📅 | **Timeline & calendar** | One endpoint flattens the whole trip into one entry per calendar day, city attached. |
-| 🌍 | **Public sharing** | Flip a switch, get a slug. Anyone can read it; a signed-in visitor can deep-copy it into their own account. |
-| 📊 | **Admin analytics** | Platform counts, most-visited cities, most-used activities. |
+|     | Capability                    | How it works                                                                                                                                 |
+| :-: | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🗺️  | **Multi-city itineraries**    | A trip is an ordered list of stops; each stop is a city with its own date range and activities. Reordering is a single transactional call.   |
+| 🔎  | **City & activity discovery** | Searchable catalogue with country/region filters, a cost index, and activity filters by category, price and duration.                        |
+| 💸  | **Automatic budgeting**       | Costs come from the itinerary itself. Add flights and hotels manually and you get category totals, a per-day curve and over-budget warnings. |
+| 📅  | **Timeline & calendar**       | One endpoint flattens the whole trip into one entry per calendar day, city attached.                                                         |
+| 🌍  | **Public sharing**            | Flip a switch, get a slug. Anyone can read it; a signed-in visitor can deep-copy it into their own account.                                  |
+| 📊  | **Admin analytics**           | Platform counts, most-visited cities, most-used activities.                                                                                  |
 
 ---
 
@@ -55,10 +55,10 @@ npm run dev:client                # http://localhost:5173
 
 Seed accounts — password `Password123`:
 
-| Email | Role | Notes |
-| --- | --- | --- |
-| `demo@globetrotter.app` | `USER` | Owns a fully populated, publicly shared trip |
-| `admin@globetrotter.app` | `ADMIN` | Can reach `/api/admin/*` |
+| Email                    | Role    | Notes                                        |
+| ------------------------ | ------- | -------------------------------------------- |
+| `demo@globetrotter.app`  | `USER`  | Owns a fully populated, publicly shared trip |
+| `admin@globetrotter.app` | `ADMIN` | Can reach `/api/admin/*`                     |
 
 Vite proxies `/api` → `localhost:4000`, so the frontend never deals with CORS in development.
 
@@ -126,20 +126,20 @@ Three details worth knowing:
 
 The 12 wireframed screens and the endpoints that back them.
 
-| # | Screen | Endpoints |
-| --: | --- | --- |
-| 1 | Login | `POST /auth/login` · `POST /auth/forgot-password` · `POST /auth/reset-password` |
-| 2 | Registration | `POST /auth/signup` · `POST /users/me/avatar` |
-| 3 | Main landing | `GET /trips?filter=upcoming` · `GET /cities?sort=popularity` |
-| 4 | Create a new trip | `POST /trips` · `GET /cities` · `GET /activities` |
-| 5 | Build itinerary | `POST /trips/:id/stops` · `PUT /trips/:id/stops/reorder` · `POST …/stops/:stopId/activities` |
-| 6 | User trip listing | `GET /trips?filter=all\|upcoming\|ongoing\|past` |
-| 7 | User profile | `GET /auth/me` · `PATCH /users/me` · `GET /users/me/saved-destinations` |
-| 8 | Activity / city search | `GET /activities?q&category&maxCost` · `GET /cities?q&country` |
-| 9 | Itinerary + budget | `GET /trips/:id` · `GET /trips/:id/budget` |
-| 10 | Community tab | `GET /public/trips?q&country&sort` · `GET /public/countries` |
-| 11 | Calendar view | `GET /trips/:id/timeline` · `PUT …/activities/reorder` |
-| 12 | Admin panel | `GET /admin/stats` · `GET /admin/users` · `GET /admin/trips` |
+|   # | Screen                 | Endpoints                                                                                    |
+| --: | ---------------------- | -------------------------------------------------------------------------------------------- |
+|   1 | Login                  | `POST /auth/login` · `POST /auth/forgot-password` · `POST /auth/reset-password`              |
+|   2 | Registration           | `POST /auth/signup` · `POST /users/me/avatar`                                                |
+|   3 | Main landing           | `GET /trips?filter=upcoming` · `GET /cities?sort=popularity`                                 |
+|   4 | Create a new trip      | `POST /trips` · `GET /cities` · `GET /activities`                                            |
+|   5 | Build itinerary        | `POST /trips/:id/stops` · `PUT /trips/:id/stops/reorder` · `POST …/stops/:stopId/activities` |
+|   6 | User trip listing      | `GET /trips?filter=all\|upcoming\|ongoing\|past`                                             |
+|   7 | User profile           | `GET /auth/me` · `PATCH /users/me` · `GET /users/me/saved-destinations`                      |
+|   8 | Activity / city search | `GET /activities?q&category&maxCost` · `GET /cities?q&country`                               |
+|   9 | Itinerary + budget     | `GET /trips/:id` · `GET /trips/:id/budget`                                                   |
+|  10 | Community tab          | `GET /public/trips?q&country&sort` · `GET /public/countries`                                 |
+|  11 | Calendar view          | `GET /trips/:id/timeline` · `PUT …/activities/reorder`                                       |
+|  12 | Admin panel            | `GET /admin/stats` · `GET /admin/users` · `GET /admin/trips`                                 |
 
 Full request/response reference: **[`server/README.md`](server/README.md)**
 
@@ -158,7 +158,7 @@ problem statement `docs/GlobeTrotter.pdf` (kept local, not tracked)
 
 ```bash
 npm run db:up          # tests need Postgres
-npm test -w server     # 105 integration tests
+npm test -w server     # 124 integration tests
 ```
 
 Not unit tests with mocks — every case drives the real Express app through `supertest` against
@@ -171,7 +171,7 @@ truncated between cases, so tests are order-independent and your dev data is nev
 - **Auth** — signup normalisation, first/last name derivation, duplicate `409`, identical
   `401` for wrong-password and unknown-email (no account enumeration), single-use and
   expiring reset tokens, rate-limit budgets
-- **Community feed** — published-only listing, search across trip name *and* itinerary
+- **Community feed** — published-only listing, search across trip name _and_ itinerary
   cities, country filter, pagination, disappearing from the feed when unshared
 - **Uploads** — generated filenames, mimetype rejection, static round-trip, ownership
 - **Authorization** — a stranger's `403` on every nested trip route: stops, activities, expenses
@@ -196,7 +196,7 @@ flowchart LR
 
   subgraph S[" Server "]
     direction TB
-    S1[migrate deploy] --> S2[schema drift check] --> S3[typecheck] --> S4[build] --> S5[105 tests] --> S6[seed]
+    S1[migrate deploy] --> S2[schema drift check] --> S3[typecheck] --> S4[build] --> S5[124 tests] --> S6[seed]
   end
 
   subgraph C[" Client "]
@@ -265,11 +265,11 @@ globetrotter/
 
 ## Who owns what
 
-| Track | Owns | Agent |
-| --- | --- | --- |
-| Backend | `server/**`, `docker-compose.yml`, `.github/**` | Claude |
-| Frontend & design | `client/src/{pages,components,layouts,styles,hooks}` | Codex |
-| Shared contract | `client/src/types/api.ts`, `client/src/lib/api.ts`, `server/README.md` | coordinate before changing |
+| Track             | Owns                                                                   | Agent                      |
+| ----------------- | ---------------------------------------------------------------------- | -------------------------- |
+| Backend           | `server/**`, `docker-compose.yml`, `.github/**`                        | Claude                     |
+| Frontend & design | `client/src/{pages,components,layouts,styles,hooks}`                   | Codex                      |
+| Shared contract   | `client/src/types/api.ts`, `client/src/lib/api.ts`, `server/README.md` | coordinate before changing |
 
 Separate branches, merged by PR. Details in [`AGENTS.md`](AGENTS.md).
 
@@ -283,7 +283,25 @@ Separate branches, merged by PR. Details in [`AGENTS.md`](AGENTS.md).
 
 **Done since the first scaffold**
 
-- Community feed — `GET /public/trips` with search across trip names *and* itinerary
+Second pass — a line-by-line audit of the PDF's "Key Functionality/Components" turned up
+four requirements with no endpoint behind them. All four are now built:
+
+- **Editable email** (feature 12 lists name, photo *and* email). `PATCH /users/me/email`
+  re-authenticates with the current password, rejects addresses already in use, and
+  invalidates reset links sent to the old address.
+- **Admin user management tools** (feature 13). Promote, demote and delete travellers,
+  with guards so an admin cannot change or delete their own account and the last
+  remaining admin cannot be removed. `/admin/stats` also gained an engagement block.
+- **Dashboard budget highlights** (feature 2). `GET /trips/summary` returns trip counts,
+  the next departure and category totals for money still ahead — one query, not one per trip.
+- **Recommended destinations** (feature 2). `GET /cities/recommended` ranks by popularity
+  and, for a signed-in traveller, skips cities they have already saved or planned.
+
+Plus activity descriptions in the seed, for feature 8's "quick view of description".
+
+**First pass**
+
+- Community feed — `GET /public/trips` with search across trip names _and_ itinerary
   cities, country filter, sort and pagination, plus `GET /public/countries`
 - Registration fields — `firstName`, `lastName`, `phone`, `bio`; signup takes either a
   display name or a first/last pair
@@ -298,6 +316,10 @@ Separate branches, merged by PR. Details in [`AGENTS.md`](AGENTS.md).
 
 **Still open**
 
+- Social-media share cards (feature 11) would need server-rendered Open Graph tags; the
+  SPA cannot produce them and a link preview is the only part not covered
+- Activity and city images are still `null` in the seed — the schema holds the URLs, but
+  the frontend supplies its own fallbacks
 - Password reset delivers no email — the token comes back in the response outside
   production. Needs a mail provider before this ships.
 - Uploads go to local disk. Fine for a demo behind one container with a volume; object

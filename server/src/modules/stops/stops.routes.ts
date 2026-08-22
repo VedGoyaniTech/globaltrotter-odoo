@@ -210,7 +210,9 @@ stopsRouter.put(
     }
 
     await prisma.$transaction(
-      activityIds.map((id, i) => prisma.tripActivity.update({ where: { id }, data: { orderIndex: i } })),
+      activityIds.map((id, i) =>
+        prisma.tripActivity.update({ where: { id }, data: { orderIndex: i } }),
+      ),
     );
 
     res.json(

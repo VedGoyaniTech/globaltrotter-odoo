@@ -15,7 +15,9 @@ describe('POST /api/auth/signup', () => {
   });
 
   it('rejects a duplicate email with 409', async () => {
-    await api().post('/api/auth/signup').send({ name: 'Alice', email: 'dupe@test.dev', password: PASSWORD });
+    await api()
+      .post('/api/auth/signup')
+      .send({ name: 'Alice', email: 'dupe@test.dev', password: PASSWORD });
     const res = await api()
       .post('/api/auth/signup')
       .send({ name: 'Bob', email: 'dupe@test.dev', password: PASSWORD });

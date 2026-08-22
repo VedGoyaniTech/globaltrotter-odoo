@@ -19,14 +19,20 @@ const schema = z.object({
   // client IP, so this must be right or every request looks like one address.
   TRUST_PROXY: z.coerce.number().int().min(0).max(10).default(0),
   UPLOAD_DIR: z.string().default('uploads'),
-  MAX_UPLOAD_BYTES: z.coerce.number().int().min(1024).default(5 * 1024 * 1024),
+  MAX_UPLOAD_BYTES: z.coerce
+    .number()
+    .int()
+    .min(1024)
+    .default(5 * 1024 * 1024),
 });
 
 const parsed = schema.safeParse(process.env);
 
 if (!parsed.success) {
   const issues = parsed.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`).join('\n');
-  console.error(`Invalid environment configuration:\n${issues}\n\nCopy server/.env.example to server/.env and fill it in.`);
+  console.error(
+    `Invalid environment configuration:\n${issues}\n\nCopy server/.env.example to server/.env and fill it in.`,
+  );
   process.exit(1);
 }
 

@@ -78,7 +78,100 @@ export async function listTrips(
     prisma.trip.count({ where }),
   ]);
 
-  return { items, total, page: opts.page, limit: opts.limit, pages: Math.ceil(total / opts.limit) || 1 };
+  return {
+    items,
+    total,
+    page: opts.page,
+    limit: opts.limit,
+    pages: Math.ceil(total / opts.limit) || 1,
+  };
+}
+
+/**
+ * Dashboard summary: trip counts plus the budget highlights the home screen
+ * shows. Everything is derived from one query over the user's live trips
+ * rather than a per-trip round trip.
+ */
+export async function getDashboardSummary(userId: string) {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  const trips = await prisma.trip.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      name: true,
+      startDate: true,
+      endDate: true,
+      budgetLimit: true,
+      coverPhotoUrl: true,
+      expenses: { select: { category: true, amount: true } },
+      stops: { select: { activities: { select: { cost: true } } } },
+    },
+    orderBy: { startDate: 'asc' },
+  });
+
+  const counts = { total: trips.length, upcoming: 0, ongoing: 0, past: 0 };
+  const byCategory: Record<string, number> = {
+    TRANSPORT: 0,
+    STAY: 0,
+    ACTIVITIES: 0,
+    MEALS: 0,
+    OTHER: 0,
+  };
+
+  let plannedTotal = 0;
+  let overBudgetTrips = 0;
+  let nextTrip: {
+    id: string;
+    name: string;
+    startDate: Date;
+    daysUntil: number;
+    total: number;
+  } | null = null;
+  let mostExpensive: { id: string; name: string; total: number } | null = null;
+
+  for (const trip of trips) {
+    const isPast = trip.endDate < today;
+    const isFuture = trip.startDate > today;
+    if (isPast) counts.past += 1;
+    else if (isFuture) counts.upcoming += 1;
+    else counts.ongoing += 1;
+
+    const activityTotal = trip.stops.reduce(
+      (sum, stop) => sum + stop.activities.reduce((inner, a) => inner + Number(a.cost), 0),
+      0,
+    );
+    const expenseTotal = trip.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+    const total = activityTotal + expenseTotal;
+
+    // Highlights describe money still to be spent, so finished trips are excluded.
+    if (isPast) continue;
+
+    plannedTotal += total;
+    byCategory.ACTIVITIES += activityTotal;
+    for (const e of trip.expenses) byCategory[e.category] += Number(e.amount);
+
+    if (trip.budgetLimit !== null && total > Number(trip.budgetLimit)) overBudgetTrips += 1;
+    if (!mostExpensive || total > mostExpensive.total) {
+      mostExpensive = { id: trip.id, name: trip.name, total };
+    }
+    if (isFuture && !nextTrip) {
+      nextTrip = {
+        id: trip.id,
+        name: trip.name,
+        startDate: trip.startDate,
+        daysUntil: Math.round((trip.startDate.getTime() - today.getTime()) / 86_400_000),
+        total,
+      };
+    }
+  }
+
+  return {
+    counts,
+    nextTrip,
+    budget: { plannedTotal, byCategory, overBudgetTrips, mostExpensive },
+  };
 }
 
 export async function getTrip(tripId: string, userId: string) {
@@ -139,7 +232,9 @@ export function buildDayByDay(trip: Awaited<ReturnType<typeof getTrip>>): DayEnt
   while (cursor <= trip.endDate) {
     const iso = cursor.toISOString().slice(0, 10);
     const stop = trip.stops.find(
-      (s) => s.startDate.toISOString().slice(0, 10) <= iso && iso <= s.endDate.toISOString().slice(0, 10),
+      (s) =>
+        s.startDate.toISOString().slice(0, 10) <= iso &&
+        iso <= s.endDate.toISOString().slice(0, 10),
     );
 
     days.push({

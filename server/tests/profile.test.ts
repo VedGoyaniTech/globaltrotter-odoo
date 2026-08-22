@@ -54,7 +54,10 @@ describe('signup with the registration-form fields', () => {
 
   it('rejects a malformed phone number', async () => {
     const res = await api().post('/api/auth/signup').send({
-      name: 'Phone Person', email: 'phone@test.dev', password: PASSWORD, phone: 'call-me',
+      name: 'Phone Person',
+      email: 'phone@test.dev',
+      password: PASSWORD,
+      phone: 'call-me',
     });
 
     expect(res.status).toBe(400);

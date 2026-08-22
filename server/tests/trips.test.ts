@@ -38,7 +38,9 @@ describe('POST /api/trips', () => {
   });
 
   it('requires authentication', async () => {
-    const res = await api().post('/api/trips').send({ name: 'X', startDate: DATES.start, endDate: DATES.end });
+    const res = await api()
+      .post('/api/trips')
+      .send({ name: 'X', startDate: DATES.start, endDate: DATES.end });
     expect(res.status).toBe(401);
   });
 });
@@ -102,7 +104,9 @@ describe('trip ownership', () => {
     const stranger = await makeUser();
     const trip = await makeTrip(owner.user.id);
 
-    expect((await api().delete(`/api/trips/${trip.id}`).set(auth(stranger.token))).status).toBe(403);
+    expect((await api().delete(`/api/trips/${trip.id}`).set(auth(stranger.token))).status).toBe(
+      403,
+    );
     expect((await api().delete(`/api/trips/${trip.id}`).set(auth(owner.token))).status).toBe(204);
   });
 
@@ -118,14 +122,23 @@ describe('POST /api/trips/:id/share', () => {
     const { user, token } = await makeUser();
     const trip = await makeTrip(user.id);
 
-    const on = await api().post(`/api/trips/${trip.id}/share`).set(auth(token)).send({ isPublic: true });
+    const on = await api()
+      .post(`/api/trips/${trip.id}/share`)
+      .set(auth(token))
+      .send({ isPublic: true });
     expect(on.status).toBe(200);
     expect(on.body.publicSlug).toBeTypeOf('string');
 
-    const off = await api().post(`/api/trips/${trip.id}/share`).set(auth(token)).send({ isPublic: false });
+    const off = await api()
+      .post(`/api/trips/${trip.id}/share`)
+      .set(auth(token))
+      .send({ isPublic: false });
     expect(off.body.isPublic).toBe(false);
 
-    const again = await api().post(`/api/trips/${trip.id}/share`).set(auth(token)).send({ isPublic: true });
+    const again = await api()
+      .post(`/api/trips/${trip.id}/share`)
+      .set(auth(token))
+      .send({ isPublic: true });
     expect(again.body.publicSlug).toBe(on.body.publicSlug);
   });
 });

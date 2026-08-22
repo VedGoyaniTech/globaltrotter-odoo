@@ -6,6 +6,7 @@ import { requireAuth } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
 import { publicUrlFor, removeUploaded, uploadImage } from '../../middleware/upload.js';
 import { ApiError } from '../../lib/errors.js';
+import { verifyPassword } from '../../lib/password.js';
 
 export const usersRouter = Router();
 usersRouter.use(requireAuth);
@@ -55,6 +56,47 @@ usersRouter.patch(
         select: publicUser,
       }),
     );
+  }),
+);
+
+const changeEmailSchema = z.object({
+  email: z.string().trim().toLowerCase().email(),
+  // Email is the account's identity and its password-reset channel, so changing
+  // it is re-authenticated rather than treated as an ordinary profile edit.
+  currentPassword: z.string().min(1),
+});
+
+// PATCH /api/users/me/email - Profile / Settings screen.
+usersRouter.patch(
+  '/me/email',
+  validate({ body: changeEmailSchema }),
+  asyncHandler(async (req, res) => {
+    const { email, currentPassword } = req.body as z.infer<typeof changeEmailSchema>;
+
+    const account = await prisma.user.findUniqueOrThrow({
+      where: { id: req.user!.id },
+      select: { email: true, passwordHash: true },
+    });
+
+    if (!(await verifyPassword(currentPassword, account.passwordHash))) {
+      throw ApiError.unauthorized('Current password is incorrect');
+    }
+    if (email === account.email) {
+      return res.json(
+        await prisma.user.findUniqueOrThrow({ where: { id: req.user!.id }, select: publicUser }),
+      );
+    }
+    if (await prisma.user.findUnique({ where: { email } })) {
+      throw ApiError.conflict('That email is already in use');
+    }
+
+    // Any reset link sent to the old address must stop working.
+    const [updated] = await prisma.$transaction([
+      prisma.user.update({ where: { id: req.user!.id }, data: { email }, select: publicUser }),
+      prisma.passwordResetToken.deleteMany({ where: { userId: req.user!.id } }),
+    ]);
+
+    res.json(updated);
   }),
 );
 
