@@ -479,11 +479,13 @@ svg {
   background: rgba(255, 255, 255, 0.12);
 }
 .sidebar--compact {
-  width: 84px;
-  padding-inline: 0.85rem;
+  width: 92px;
+  padding-inline: 12px;
 }
-.sidebar--compact .brand {
+.sidebar--compact > .brand {
+  width: 100%;
   justify-content: center;
+  gap: 0;
 }
 .sidebar--compact .brand__name,
 .sidebar--compact .nav-link__label,
@@ -499,27 +501,45 @@ svg {
   transform: translateX(50%) rotate(180deg);
 }
 .sidebar--compact nav {
+  width: 100%;
   margin-top: 4.5rem;
+  justify-items: center;
 }
 .sidebar--compact .nav-link,
 .sidebar--compact .profile-chip {
-  padding-inline: 0;
+  width: 52px;
+  min-height: 52px;
+  padding: 0;
   justify-content: center;
   gap: 0;
 }
+.sidebar--compact .nav-link > svg {
+  width: 23px;
+  height: 23px;
+  margin: 0;
+}
 .sidebar--compact .profile-chip {
   display: flex;
+  border-top: 0;
+}
+.sidebar--compact .sidebar__bottom {
+  width: 100%;
+  padding-top: 1rem;
+  justify-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 .sidebar--compact .nav-link:hover {
   transform: translateY(-2px);
 }
 .app-main {
   min-height: 100vh;
+  min-width: 0;
   margin-left: 244px;
+  overflow-x: clip;
   transition: margin-left 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .app-shell--compact .app-main {
-  margin-left: 84px;
+  margin-left: 92px;
 }
 .page {
   width: min(1380px, 100%);
@@ -731,18 +751,6 @@ svg {
   color: var(--muted);
   font-size: 0.82rem;
 }
-.demo-note {
-  padding: 0.9rem 1rem;
-  display: grid;
-  gap: 0.2rem;
-  border-left: 3px solid var(--gold);
-  background: #fbf4df;
-  font-size: 0.76rem;
-}
-.demo-note span {
-  color: var(--muted);
-}
-
 .hero-card {
   min-height: clamp(350px, 52vh, 470px);
   padding: clamp(2rem, 5vw, 4.2rem);

@@ -14,6 +14,13 @@ function formatDateRange(trip: TripListItem) {
   return `${start.toLocaleDateString('en', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 }
 
+function getTimeGreeting(hour: number) {
+  if (hour >= 5 && hour < 12) return { label: 'Good morning', emoji: '☀️' };
+  if (hour >= 12 && hour < 17) return { label: 'Good afternoon', emoji: '🌤️' };
+  if (hour >= 17 && hour < 21) return { label: 'Good evening', emoji: '🌆' };
+  return { label: 'Good night', emoji: '🌙' };
+}
+
 export function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -23,6 +30,8 @@ export function DashboardPage() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const greeting = getTimeGreeting(new Date().getHours());
+  const accountName = user?.firstName?.trim() || user?.name.trim().split(/\s+/)[0] || 'Traveler';
 
   useEffect(() => {
     let active = true;
@@ -64,7 +73,7 @@ export function DashboardPage() {
     <div className="page dashboard-page">
       <PageHeader
         eyebrow="Travel dashboard"
-        title={`Good ${new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, ${user?.name.split(' ')[0] ?? 'traveler'} 👋`}
+        title={`${greeting.label}, ${accountName} ${greeting.emoji}`}
         description="Where will your curiosity take you next?"
         actions={
           <Link to="/trips/new" className="button button--primary">

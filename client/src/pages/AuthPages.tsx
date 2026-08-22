@@ -49,8 +49,8 @@ function AuthLayout({
 export function LoginPage() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('demo@globetrotter.app');
-  const [password, setPassword] = useState('Password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -112,10 +112,6 @@ export function LoginPage() {
         <p className="auth-switch">
           New to GlobeTrotter? <Link to="/signup">Create an account</Link>
         </p>
-        <div className="demo-note">
-          <strong>Demo ready</strong>
-          <span>The seeded traveler credentials are prefilled for the hackathon demo.</span>
-        </div>
       </div>
     </AuthLayout>
   );

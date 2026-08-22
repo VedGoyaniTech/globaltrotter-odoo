@@ -490,7 +490,15 @@ async function main() {
     where: { userId: demo.id, name: 'European Summer Loop' },
   });
 
-  if (!existingTrip) {
+  if (existingTrip) {
+    await prisma.trip.update({
+      where: { id: existingTrip.id },
+      data: {
+        coverPhotoUrl:
+          'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=1600&q=84',
+      },
+    });
+  } else {
     const paris = cityByName.get('Paris')!;
     const rome = cityByName.get('Rome')!;
     const barcelona = cityByName.get('Barcelona')!;
@@ -506,6 +514,8 @@ async function main() {
         userId: demo.id,
         name: 'European Summer Loop',
         description: 'Three cities, ten days, mostly trains and pastries.',
+        coverPhotoUrl:
+          'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=1600&q=84',
         startDate: day(21),
         endDate: day(30),
         budgetLimit: 2500,
@@ -562,6 +572,128 @@ async function main() {
     });
   }
 
+  // Personal demo history across every trip filter and the current calendar.
+  // Each name is stable, so this remains idempotent when the seed is re-run.
+  const personalTrips = [
+    {
+      name: 'Goa Workation Week',
+      description: 'A relaxed week of focused mornings, sunset swims and one diving day.',
+      coverPhotoUrl:
+        'https://images.unsplash.com/photo-1512100356356-de1b84283e18?auto=format&fit=crop&w=1600&q=84',
+      startOffset: -3,
+      endOffset: 4,
+      budgetLimit: 900,
+      stops: [{ city: 'Goa', startOffset: -3, endOffset: 4, budget: 520 }],
+      expenses: [
+        { category: ExpenseCategory.TRANSPORT, label: 'Return train', amount: 85 },
+        { category: ExpenseCategory.STAY, label: 'Beachside guesthouse', amount: 360 },
+        { category: ExpenseCategory.MEALS, label: 'Cafes and dinners', amount: 140 },
+      ],
+    },
+    {
+      name: 'Rajasthan Weekend Memories',
+      description: 'Rose-coloured streets, lake evenings and a notebook full of architecture.',
+      coverPhotoUrl:
+        'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1600&q=84',
+      startOffset: -76,
+      endOffset: -69,
+      budgetLimit: 780,
+      stops: [
+        { city: 'Jaipur', startOffset: -76, endOffset: -73, budget: 300 },
+        { city: 'Udaipur', startOffset: -73, endOffset: -69, budget: 280 },
+      ],
+      expenses: [
+        { category: ExpenseCategory.TRANSPORT, label: 'Rail and transfers', amount: 120 },
+        { category: ExpenseCategory.STAY, label: 'Heritage stays', amount: 310 },
+        { category: ExpenseCategory.ACTIVITIES, label: 'Forts and lake cruise', amount: 95 },
+      ],
+    },
+    {
+      name: 'Japan Autumn Notes',
+      description: 'Neon evenings in Tokyo followed by slow temple mornings in Kyoto.',
+      coverPhotoUrl:
+        'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1600&q=84',
+      startOffset: 55,
+      endOffset: 64,
+      budgetLimit: 3200,
+      stops: [
+        { city: 'Tokyo', startOffset: 55, endOffset: 59, budget: 1100 },
+        { city: 'Kyoto', startOffset: 59, endOffset: 64, budget: 900 },
+      ],
+      expenses: [
+        { category: ExpenseCategory.TRANSPORT, label: 'Flights', amount: 980 },
+        { category: ExpenseCategory.TRANSPORT, label: 'Rail pass', amount: 330 },
+        { category: ExpenseCategory.STAY, label: 'Hotels and ryokan', amount: 1050 },
+      ],
+    },
+  ];
+
+  for (const tripSeed of personalTrips) {
+    const existing = await prisma.trip.findFirst({
+      where: { userId: demo.id, name: tripSeed.name },
+    });
+    if (existing) {
+      await prisma.trip.update({
+        where: { id: existing.id },
+        data: { coverPhotoUrl: tripSeed.coverPhotoUrl },
+      });
+      continue;
+    }
+
+    const stops = [];
+    for (const [index, stopSeed] of tripSeed.stops.entries()) {
+      const city = cityByName.get(stopSeed.city);
+      if (!city) continue;
+      const catalogue = await prisma.activity.findMany({
+        where: { cityId: city.id },
+        orderBy: { name: 'asc' },
+        take: 2,
+      });
+      stops.push({
+        cityId: city.id,
+        startDate: day(stopSeed.startOffset),
+        endDate: day(stopSeed.endOffset),
+        orderIndex: index,
+        budget: stopSeed.budget,
+        activities: {
+          create: catalogue.map((activity, activityIndex) => ({
+            activityId: activity.id,
+            name: activity.name,
+            cost: activity.cost,
+            durationMinutes: activity.durationMinutes,
+            scheduledDate: day(stopSeed.startOffset + Math.min(activityIndex + 1, 2)),
+            startTime: activityIndex === 0 ? '09:30' : '15:00',
+            orderIndex: activityIndex,
+          })),
+        },
+      });
+    }
+
+    await prisma.trip.create({
+      data: {
+        userId: demo.id,
+        name: tripSeed.name,
+        description: tripSeed.description,
+        coverPhotoUrl: tripSeed.coverPhotoUrl,
+        startDate: day(tripSeed.startOffset),
+        endDate: day(tripSeed.endOffset),
+        budgetLimit: tripSeed.budgetLimit,
+        stops: { create: stops },
+        expenses: { create: tripSeed.expenses },
+      },
+    });
+  }
+
+  for (const cityName of ['Kyoto', 'Bali', 'Reykjavik', 'Udaipur']) {
+    const city = cityByName.get(cityName);
+    if (!city) continue;
+    await prisma.savedDestination.upsert({
+      where: { userId_cityId: { userId: demo.id, cityId: city.id } },
+      create: { userId: demo.id, cityId: city.id },
+      update: {},
+    });
+  }
+
   // A few more published itineraries so the community feed is not a single card.
   const community: {
     author: string;
@@ -570,6 +702,7 @@ async function main() {
     blurb: string;
     cities: string[];
     slug: string;
+    coverPhotoUrl: string;
   }[] = [
     {
       author: 'Meera Shah',
@@ -578,6 +711,8 @@ async function main() {
       blurb: 'Forts, step-wells and far too much dal baati.',
       cities: ['Jaipur', 'Udaipur'],
       slug: 'demo-rajasthan',
+      coverPhotoUrl:
+        'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1600&q=84',
     },
     {
       author: 'Tomas Nowak',
@@ -586,6 +721,8 @@ async function main() {
       blurb: 'Two cities, no rushing, one rail pass.',
       cities: ['Tokyo', 'Kyoto'],
       slug: 'demo-slow-japan',
+      coverPhotoUrl:
+        'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1600&q=84',
     },
     {
       author: 'Aisha Rahman',
@@ -594,12 +731,20 @@ async function main() {
       blurb: 'Street food, beaches and under fifty a day.',
       cities: ['Bangkok', 'Bali'],
       slug: 'demo-sea-budget',
+      coverPhotoUrl:
+        'https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?auto=format&fit=crop&w=1600&q=84',
     },
   ];
 
   for (const entry of community) {
     const existing = await prisma.trip.findUnique({ where: { publicSlug: entry.slug } });
-    if (existing) continue;
+    if (existing) {
+      await prisma.trip.update({
+        where: { id: existing.id },
+        data: { coverPhotoUrl: entry.coverPhotoUrl },
+      });
+      continue;
+    }
 
     const [first, last] = entry.author.split(' ');
     const author = await prisma.user.upsert({
@@ -633,6 +778,7 @@ async function main() {
         userId: author.id,
         name: entry.trip,
         description: entry.blurb,
+        coverPhotoUrl: entry.coverPhotoUrl,
         startDate: day(40),
         endDate: day(44 + (entry.cities.length - 1) * 4),
         isPublic: true,
@@ -649,8 +795,6 @@ async function main() {
   }
 
   console.log('Seed complete.');
-  console.log('  demo@globetrotter.app  / Password123');
-  console.log('  admin@globetrotter.app / Password123  (ADMIN)');
 }
 
 main()
