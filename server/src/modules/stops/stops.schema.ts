@@ -11,6 +11,7 @@ export const createStopSchema = z
     startDate: isoDate,
     endDate: isoDate,
     notes: z.string().trim().max(1000).optional(),
+    budget: z.coerce.number().min(0).optional(),
   })
   .refine((v) => v.endDate >= v.startDate, {
     message: 'endDate must be on or after startDate',
@@ -22,11 +23,17 @@ export const updateStopSchema = z.object({
   startDate: isoDate.optional(),
   endDate: isoDate.optional(),
   notes: z.string().trim().max(1000).nullable().optional(),
+  budget: z.coerce.number().min(0).nullable().optional(),
 });
 
 /** Full ordered list of stop ids - used by drag-to-reorder. */
 export const reorderStopsSchema = z.object({
   stopIds: z.array(z.string().min(1)).min(1),
+});
+
+/** Full ordered list of activity ids on one stop - used by drag-to-reorder. */
+export const reorderActivitiesSchema = z.object({
+  activityIds: z.array(z.string().min(1)).min(1),
 });
 
 export const createTripActivitySchema = z.object({

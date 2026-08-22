@@ -153,3 +153,33 @@ describe('/api/users/me', () => {
     expect((await api().get('/api/auth/me').set(auth(token))).status).toBe(404);
   });
 });
+
+describe('admin list pagination', () => {
+  it('paginates users and reports the total', async () => {
+    for (let i = 0; i < 5; i++) await makeUser({ email: `bulk-${i}@test.dev` });
+    const admin = await makeUser({ role: Role.ADMIN, email: 'pager@test.dev' });
+
+    const res = await api().get('/api/admin/users?limit=2&page=2').set(auth(admin.token));
+
+    expect(res.status).toBe(200);
+    expect(res.body.items).toHaveLength(2);
+    expect(res.body.total).toBe(6); // 5 + the admin
+    expect(res.body.pages).toBe(3);
+  });
+
+  it('paginates trips', async () => {
+    const owner = await makeUser();
+    for (let i = 0; i < 3; i++) await makeTrip(owner.user.id, { name: `T${i}` });
+    const admin = await makeUser({ role: Role.ADMIN });
+
+    const res = await api().get('/api/admin/trips?limit=2').set(auth(admin.token));
+
+    expect(res.body.items).toHaveLength(2);
+    expect(res.body.total).toBe(3);
+  });
+
+  it('rejects an oversized limit', async () => {
+    const admin = await makeUser({ role: Role.ADMIN });
+    expect((await api().get('/api/admin/users?limit=5000').set(auth(admin.token))).status).toBe(400);
+  });
+});

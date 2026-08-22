@@ -8,3 +8,5 @@ client/src
 *.log
 .env
 **/.env
+server/uploads
+server/tests

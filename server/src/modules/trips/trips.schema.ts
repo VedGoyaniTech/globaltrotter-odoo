@@ -37,7 +37,7 @@ export const updateTripSchema = z
 
 export const listTripsQuery = z.object({
   q: z.string().trim().max(120).optional(),
-  filter: z.enum(['all', 'upcoming', 'past']).default('all'),
+  filter: z.enum(['all', 'upcoming', 'ongoing', 'past']).default('all'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });

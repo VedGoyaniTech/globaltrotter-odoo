@@ -6,7 +6,7 @@
   <a href="https://github.com/VedGoyaniTech/globaltrotter-odoo/actions/workflows/ci.yml">
     <img src="https://github.com/VedGoyaniTech/globaltrotter-odoo/actions/workflows/ci.yml/badge.svg" alt="CI">
   </a>
-  <img src="https://img.shields.io/badge/tests-67%20passing-2BB3A3?labelColor=221A28" alt="67 tests passing">
+  <img src="https://img.shields.io/badge/tests-105%20passing-2BB3A3?labelColor=221A28" alt="105 tests passing">
   <img src="https://img.shields.io/badge/Node-20%2B-714B67?labelColor=221A28" alt="Node 20+">
   <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?labelColor=221A28" alt="TypeScript strict">
   <img src="https://img.shields.io/badge/PostgreSQL-16-336791?labelColor=221A28" alt="PostgreSQL 16">
@@ -62,6 +62,29 @@ Seed accounts — password `Password123`:
 
 Vite proxies `/api` → `localhost:4000`, so the frontend never deals with CORS in development.
 
+### Full stack with Docker Compose
+
+Run PostgreSQL, the production-style Express backend, and the hot-reloading Vite frontend
+with one command:
+
+```bash
+docker compose up --build
+```
+
+Open the frontend at `http://localhost:5173`; the API and health endpoint are available at
+`http://localhost:4000/api` and `http://localhost:4000/api/health`. Compose waits for the
+database and backend health checks before starting their dependants. Frontend source under
+`client/` is bind-mounted into its container, so edits refresh in the browser without an
+image rebuild. Set a non-demo JWT secret when needed:
+
+```bash
+JWT_SECRET="$(openssl rand -base64 48)" docker compose up --build
+```
+
+Uploaded avatars and trip covers persist in the `uploads_data` volume; PostgreSQL data uses
+`db_data`. Stop the stack with `docker compose down` (add `-v` only when you intentionally
+want to delete both volumes).
+
 ---
 
 ## Architecture
@@ -106,16 +129,16 @@ The 12 wireframed screens and the endpoints that back them.
 | # | Screen | Endpoints |
 | --: | --- | --- |
 | 1 | Login | `POST /auth/login` · `POST /auth/forgot-password` · `POST /auth/reset-password` |
-| 2 | Registration | `POST /auth/signup` |
+| 2 | Registration | `POST /auth/signup` · `POST /users/me/avatar` |
 | 3 | Main landing | `GET /trips?filter=upcoming` · `GET /cities?sort=popularity` |
 | 4 | Create a new trip | `POST /trips` · `GET /cities` · `GET /activities` |
 | 5 | Build itinerary | `POST /trips/:id/stops` · `PUT /trips/:id/stops/reorder` · `POST …/stops/:stopId/activities` |
-| 6 | User trip listing | `GET /trips?filter=all\|upcoming\|past` |
+| 6 | User trip listing | `GET /trips?filter=all\|upcoming\|ongoing\|past` |
 | 7 | User profile | `GET /auth/me` · `PATCH /users/me` · `GET /users/me/saved-destinations` |
 | 8 | Activity / city search | `GET /activities?q&category&maxCost` · `GET /cities?q&country` |
 | 9 | Itinerary + budget | `GET /trips/:id` · `GET /trips/:id/budget` |
-| 10 | Community tab | ⚠️ not built — see [Roadmap](#roadmap) |
-| 11 | Calendar view | `GET /trips/:id/timeline` |
+| 10 | Community tab | `GET /public/trips?q&country&sort` · `GET /public/countries` |
+| 11 | Calendar view | `GET /trips/:id/timeline` · `PUT …/activities/reorder` |
 | 12 | Admin panel | `GET /admin/stats` · `GET /admin/users` · `GET /admin/trips` |
 
 Full request/response reference: **[`server/README.md`](server/README.md)**
@@ -135,21 +158,25 @@ problem statement `docs/GlobeTrotter.pdf` (kept local, not tracked)
 
 ```bash
 npm run db:up          # tests need Postgres
-npm test -w server     # 67 integration tests
+npm test -w server     # 105 integration tests
 ```
 
 Not unit tests with mocks — every case drives the real Express app through `supertest` against
-a real `globetrotter_test` database. Migrations apply once per run, and all nine tables are
+a real `globetrotter_test` database. Migrations apply once per run, and every table is
 truncated between cases, so tests are order-independent and your dev data is never touched.
 
 <details>
 <summary><b>What's covered</b></summary>
 
-- **Auth** — signup normalisation, duplicate `409`, identical `401` for wrong-password and
-  unknown-email (no account enumeration), single-use and expiring reset tokens
+- **Auth** — signup normalisation, first/last name derivation, duplicate `409`, identical
+  `401` for wrong-password and unknown-email (no account enumeration), single-use and
+  expiring reset tokens, rate-limit budgets
+- **Community feed** — published-only listing, search across trip name *and* itinerary
+  cities, country filter, pagination, disappearing from the feed when unshared
+- **Uploads** — generated filenames, mimetype rejection, static round-trip, ownership
 - **Authorization** — a stranger's `403` on every nested trip route: stops, activities, expenses
-- **Ordering** — reversing three stops without tripping `unique(tripId, orderIndex)`, rejecting
-  partial or foreign id lists
+- **Ordering** — reversing stops without tripping `unique(tripId, orderIndex)`, reordering
+  activities within a stop, rejecting partial or foreign id lists
 - **Budget** — category maths, the two-source `ACTIVITIES` total, per-day bucketing,
   `overBudget` boundary at exactly the limit
 - **Sharing** — anonymous read, `404` once sharing is off, deep copy independence
@@ -169,7 +196,7 @@ flowchart LR
 
   subgraph S[" Server "]
     direction TB
-    S1[migrate deploy] --> S2[schema drift check] --> S3[typecheck] --> S4[build] --> S5[67 tests] --> S6[seed]
+    S1[migrate deploy] --> S2[schema drift check] --> S3[typecheck] --> S4[build] --> S5[105 tests] --> S6[seed]
   end
 
   subgraph C[" Client "]
@@ -254,28 +281,28 @@ Separate branches, merged by PR. Details in [`AGENTS.md`](AGENTS.md).
 
 ## Roadmap
 
-Honest state of the backend against the brief and the wireframes.
+**Done since the first scaffold**
 
-**Gaps against the wireframes**
+- Community feed — `GET /public/trips` with search across trip names *and* itinerary
+  cities, country filter, sort and pagination, plus `GET /public/countries`
+- Registration fields — `firstName`, `lastName`, `phone`, `bio`; signup takes either a
+  display name or a first/last pair
+- Per-stop budget on `TripStop`, for the section budgets in the itinerary builder
+- `ongoing` trip filter, with the three buckets now disjoint
+- Bulk activity reorder within a stop
+- Image upload for avatars and trip covers — random filenames, mimetype allow-list, size
+  cap, old file cleaned up on replace
+- Rate limiting on auth and password-reset routes, with `TRUST_PROXY` so the client IP is
+  read correctly behind a proxy
+- Admin lists paginated; spent reset tokens pruned on the next request
 
-- **Community tab (screen 10)** — there is no endpoint to browse or search *all* public
-  itineraries. `GET /public/trips/:slug` fetches exactly one by slug. Needs a paginated
-  `GET /public/trips` with search and sort.
-- **Registration fields (screen 2)** — the wireframe asks for first name, last name, phone
-  number and a free-text bio. `User` currently stores a single `name` and no phone.
-- **Per-section budget (screen 5)** — the wireframe shows a budget per itinerary section.
-  `TripStop` has no budget column; budgets live on the trip.
-- **"Ongoing" trips (screen 6)** — the list filter is `all | upcoming | past`. There is no
-  filter for a trip that is happening right now.
-- **Activity drag-to-reorder (screen 11)** — stops have a bulk `PUT /reorder`; activities
-  within a stop only have single-row `PATCH orderIndex`.
-- **Image upload** — cover photos and avatars accept a URL only. No upload endpoint or storage.
+**Still open**
 
-**Hardening**
-
-- No rate limiting on `/auth/login` or `/auth/forgot-password`
-- Password reset delivers no email; the token is returned in the response outside production
-- Expired `PasswordResetToken` rows are never pruned
-- Admin lists are capped at 100 rows with no pagination
-- No ESLint or Prettier — typecheck is currently doing that work
-- CI builds the production image but nothing deploys it yet
+- Password reset delivers no email — the token comes back in the response outside
+  production. Needs a mail provider before this ships.
+- Uploads go to local disk. Fine for a demo behind one container with a volume; object
+  storage is the real answer for more than one instance.
+- No ESLint or Prettier — typecheck is doing that work.
+- CI builds the production image but nothing deploys it.
+- `react-router-dom` has a moderate open-redirect advisory; the fix is a v7 major bump,
+  which is the design track's call.

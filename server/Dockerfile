@@ -23,6 +23,12 @@ COPY --from=build /repo/server/dist ./dist
 COPY --from=build /repo/server/prisma ./prisma
 COPY --from=build /repo/server/package.json ./package.json
 
+# Uploads are written at runtime by the unprivileged user, so the directory has
+# to exist and be owned by it before the drop. Mount a volume here to persist
+# images across container restarts.
+RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
+VOLUME ["/app/uploads"]
+
 USER node
 EXPOSE 4000
 

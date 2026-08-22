@@ -97,8 +97,12 @@ async function main() {
     where: { email: 'demo@globetrotter.app' },
     create: {
       name: 'Demo Traveller',
+      firstName: 'Demo',
+      lastName: 'Traveller',
       email: 'demo@globetrotter.app',
       passwordHash,
+      phone: '+91 98765 43210',
+      bio: 'Chasing trains, temples and good coffee.',
       city: 'Surat',
       country: 'India',
     },
@@ -184,6 +188,70 @@ async function main() {
             { category: ExpenseCategory.TRANSPORT, label: 'Rail passes', amount: 180 },
             { category: ExpenseCategory.STAY, label: 'Hotels (9 nights)', amount: 990 },
             { category: ExpenseCategory.MEALS, label: 'Food budget', amount: 450 },
+          ],
+        },
+      },
+    });
+  }
+
+  // A few more published itineraries so the community feed is not a single card.
+  const community: { author: string; email: string; trip: string; blurb: string; cities: string[]; slug: string }[] = [
+    {
+      author: 'Meera Shah', email: 'meera@globetrotter.app', trip: 'Rajasthan in Ten Days',
+      blurb: 'Forts, step-wells and far too much dal baati.',
+      cities: ['Jaipur', 'Udaipur'], slug: 'demo-rajasthan',
+    },
+    {
+      author: 'Tomas Nowak', email: 'tomas@globetrotter.app', trip: 'Slow Japan',
+      blurb: 'Two cities, no rushing, one rail pass.',
+      cities: ['Tokyo', 'Kyoto'], slug: 'demo-slow-japan',
+    },
+    {
+      author: 'Aisha Rahman', email: 'aisha@globetrotter.app', trip: 'Southeast Asia on a Budget',
+      blurb: 'Street food, beaches and under fifty a day.',
+      cities: ['Bangkok', 'Bali'], slug: 'demo-sea-budget',
+    },
+  ];
+
+  for (const entry of community) {
+    const existing = await prisma.trip.findUnique({ where: { publicSlug: entry.slug } });
+    if (existing) continue;
+
+    const [first, last] = entry.author.split(' ');
+    const author = await prisma.user.upsert({
+      where: { email: entry.email },
+      create: { name: entry.author, firstName: first, lastName: last, email: entry.email, passwordHash },
+      update: {},
+    });
+
+    const stops = entry.cities
+      .map((cityName, i) => {
+        const city = cityByName.get(cityName);
+        if (!city) return null;
+        return {
+          cityId: city.id,
+          startDate: day(40 + i * 4),
+          endDate: day(44 + i * 4),
+          orderIndex: i,
+          budget: 400 + i * 150,
+        };
+      })
+      .filter((s): s is NonNullable<typeof s> => s !== null);
+
+    await prisma.trip.create({
+      data: {
+        userId: author.id,
+        name: entry.trip,
+        description: entry.blurb,
+        startDate: day(40),
+        endDate: day(44 + (entry.cities.length - 1) * 4),
+        isPublic: true,
+        publicSlug: entry.slug,
+        stops: { create: stops },
+        expenses: {
+          create: [
+            { category: ExpenseCategory.TRANSPORT, label: 'Flights', amount: 480 },
+            { category: ExpenseCategory.STAY, label: 'Accommodation', amount: 520 },
           ],
         },
       },

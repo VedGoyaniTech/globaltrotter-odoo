@@ -188,3 +188,102 @@ describe('trip activities', () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe('per-stop budget', () => {
+  it('accepts a budget on create and clears it with null', async () => {
+    const { user, token } = await makeUser();
+    const trip = await makeTrip(user.id);
+    const city = await makeCity({ name: 'Bruges' });
+
+    const created = await api()
+      .post(`/api/trips/${trip.id}/stops`)
+      .set(auth(token))
+      .send({ cityId: city.id, startDate: DATES.start, endDate: DATES.day2, budget: 450 });
+
+    expect(created.status).toBe(201);
+    expect(Number(created.body.budget)).toBe(450);
+
+    const cleared = await api()
+      .patch(`/api/trips/${trip.id}/stops/${created.body.id}`)
+      .set(auth(token))
+      .send({ budget: null });
+
+    expect(cleared.body.budget).toBeNull();
+  });
+
+  it('rejects a negative budget', async () => {
+    const { user, token } = await makeUser();
+    const trip = await makeTrip(user.id);
+    const city = await makeCity({ name: 'Ghent Two' });
+
+    const res = await api()
+      .post(`/api/trips/${trip.id}/stops`)
+      .set(auth(token))
+      .send({ cityId: city.id, startDate: DATES.start, endDate: DATES.day2, budget: -1 });
+
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('PUT .../activities/reorder', () => {
+  async function stopWithActivities(count: number) {
+    const { token, trip, stopIds } = await tripWithStops(1);
+    const ids: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const res = await api()
+        .post(`/api/trips/${trip.id}/stops/${stopIds[0]}/activities`)
+        .set(auth(token))
+        .send({ name: `Activity ${i}` });
+      ids.push(res.body.id);
+    }
+    return { token, trip, stopId: stopIds[0], ids };
+  }
+
+  it('reverses activity order within a stop', async () => {
+    const { token, trip, stopId, ids } = await stopWithActivities(3);
+    const reversed = [...ids].reverse();
+
+    const res = await api()
+      .put(`/api/trips/${trip.id}/stops/${stopId}/activities/reorder`)
+      .set(auth(token))
+      .send({ activityIds: reversed });
+
+    expect(res.status).toBe(200);
+    expect(res.body.map((a: { id: string }) => a.id)).toEqual(reversed);
+    expect(res.body.map((a: { orderIndex: number }) => a.orderIndex)).toEqual([0, 1, 2]);
+  });
+
+  it('rejects a partial list', async () => {
+    const { token, trip, stopId, ids } = await stopWithActivities(3);
+    const res = await api()
+      .put(`/api/trips/${trip.id}/stops/${stopId}/activities/reorder`)
+      .set(auth(token))
+      .send({ activityIds: [ids[0]] });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects ids from another stop', async () => {
+    const a = await stopWithActivities(2);
+    const b = await stopWithActivities(2);
+
+    const res = await api()
+      .put(`/api/trips/${a.trip.id}/stops/${a.stopId}/activities/reorder`)
+      .set(auth(a.token))
+      .send({ activityIds: [a.ids[0], b.ids[0]] });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('is blocked for a non-owner', async () => {
+    const { trip, stopId, ids } = await stopWithActivities(2);
+    const stranger = await makeUser();
+
+    const res = await api()
+      .put(`/api/trips/${trip.id}/stops/${stopId}/activities/reorder`)
+      .set(auth(stranger.token))
+      .send({ activityIds: ids });
+
+    expect(res.status).toBe(403);
+  });
+});

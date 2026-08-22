@@ -8,7 +8,11 @@ import type { LoginInput, SignupInput } from './auth.schema.js';
 const publicUser = {
   id: true,
   name: true,
+  firstName: true,
+  lastName: true,
   email: true,
+  phone: true,
+  bio: true,
   avatarUrl: true,
   city: true,
   country: true,
@@ -25,9 +29,13 @@ export async function signup(input: SignupInput) {
 
   const user = await prisma.user.create({
     data: {
-      name: input.name,
+      name: input.name ?? `${input.firstName} ${input.lastName}`,
+      firstName: input.firstName,
+      lastName: input.lastName,
       email: input.email,
       passwordHash: await hashPassword(input.password),
+      phone: input.phone,
+      bio: input.bio,
       city: input.city,
       country: input.country,
     },
@@ -62,6 +70,15 @@ export async function me(userId: string) {
 export async function requestPasswordReset(email: string) {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) return null; // do not reveal whether the account exists
+
+  // Clear out this user's spent and expired tokens so the table cannot grow
+  // unbounded from repeated reset requests.
+  await prisma.passwordResetToken.deleteMany({
+    where: {
+      userId: user.id,
+      OR: [{ usedAt: { not: null } }, { expiresAt: { lt: new Date() } }],
+    },
+  });
 
   const raw = crypto.randomBytes(32).toString('hex');
   await prisma.passwordResetToken.create({

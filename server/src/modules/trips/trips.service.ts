@@ -23,9 +23,28 @@ export async function getOwnedTrip(tripId: string, userId: string) {
   return trip;
 }
 
+export type TripFilter = 'all' | 'upcoming' | 'ongoing' | 'past';
+
+/**
+ * The trip list screen buckets trips into three disjoint groups, so "upcoming"
+ * means "has not started yet" rather than "has not finished yet".
+ */
+function filterClause(filter: TripFilter, today: Date): Prisma.TripWhereInput {
+  switch (filter) {
+    case 'upcoming':
+      return { startDate: { gt: today } };
+    case 'ongoing':
+      return { startDate: { lte: today }, endDate: { gte: today } };
+    case 'past':
+      return { endDate: { lt: today } };
+    default:
+      return {};
+  }
+}
+
 export async function listTrips(
   userId: string,
-  opts: { q?: string; filter: 'all' | 'upcoming' | 'past'; page: number; limit: number },
+  opts: { q?: string; filter: TripFilter; page: number; limit: number },
 ) {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
@@ -33,8 +52,7 @@ export async function listTrips(
   const where: Prisma.TripWhereInput = {
     userId,
     ...(opts.q ? { name: { contains: opts.q, mode: 'insensitive' } } : {}),
-    ...(opts.filter === 'upcoming' ? { endDate: { gte: today } } : {}),
-    ...(opts.filter === 'past' ? { endDate: { lt: today } } : {}),
+    ...filterClause(opts.filter, today),
   };
 
   const [items, total] = await Promise.all([

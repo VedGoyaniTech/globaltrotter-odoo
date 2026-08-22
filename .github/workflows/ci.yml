@@ -130,4 +130,4 @@ jobs:
             -e DATABASE_URL='postgresql://u:p@127.0.0.1:5432/db' \
             -e JWT_SECRET='ci-secret-value-not-used-in-production' \
             globetrotter-server:${{ github.sha }} \
-            node --input-type=module -e "await import('./dist/app.js'); console.log('image boots')"
+            node --input-type=module -e "const { createApp } = await import('./dist/app.js'); createApp(); console.log('image boots')"

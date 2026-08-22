@@ -1,7 +1,16 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { prisma } from '../../lib/prisma.js';
 import { asyncHandler } from '../../lib/asyncHandler.js';
 import { requireAdmin, requireAuth } from '../../middleware/auth.js';
+import { validate } from '../../middleware/validate.js';
+
+const pageQuery = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(25),
+});
+
+type PageQuery = z.infer<typeof pageQuery>;
 
 // Mounted at /api/admin - optional feature 13 in the brief.
 export const adminRouter = Router();
@@ -53,9 +62,11 @@ adminRouter.get(
 
 adminRouter.get(
   '/users',
-  asyncHandler(async (_req, res) => {
-    res.json(
-      await prisma.user.findMany({
+  validate({ query: pageQuery }),
+  asyncHandler(async (req, res) => {
+    const { page, limit } = req.query as unknown as PageQuery;
+    const [items, total] = await Promise.all([
+      prisma.user.findMany({
         select: {
           id: true,
           name: true,
@@ -65,17 +76,22 @@ adminRouter.get(
           _count: { select: { trips: true } },
         },
         orderBy: { createdAt: 'desc' },
-        take: 100,
+        skip: (page - 1) * limit,
+        take: limit,
       }),
-    );
+      prisma.user.count(),
+    ]);
+    res.json({ items, total, page, limit, pages: Math.ceil(total / limit) || 1 });
   }),
 );
 
 adminRouter.get(
   '/trips',
-  asyncHandler(async (_req, res) => {
-    res.json(
-      await prisma.trip.findMany({
+  validate({ query: pageQuery }),
+  asyncHandler(async (req, res) => {
+    const { page, limit } = req.query as unknown as PageQuery;
+    const [items, total] = await Promise.all([
+      prisma.trip.findMany({
         select: {
           id: true,
           name: true,
@@ -87,8 +103,11 @@ adminRouter.get(
           _count: { select: { stops: true } },
         },
         orderBy: { createdAt: 'desc' },
-        take: 100,
+        skip: (page - 1) * limit,
+        take: limit,
       }),
-    );
+      prisma.trip.count(),
+    ]);
+    res.json({ items, total, page, limit, pages: Math.ceil(total / limit) || 1 });
   }),
 );
