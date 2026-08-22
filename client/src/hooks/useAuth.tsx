@@ -1,9 +1,21 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import { api, auth } from '../lib/api';
 import type { AuthResponse, User } from '../types/api';
 
 type Credentials = { email: string; password: string };
-type SignupDetails = Credentials & { name: string; city?: string; country?: string };
+type SignupDetails = Credentials & {
+  name: string;
+  city?: string;
+  country?: string;
+};
 
 interface AuthContextValue {
   user: User | null;
