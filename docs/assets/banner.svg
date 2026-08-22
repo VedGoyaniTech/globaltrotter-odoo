@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="GlobeTrotter — Empowering Personalized Travel Planning">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16111A"/>
+      <stop offset="0.55" stop-color="#221A28"/>
+      <stop offset="1" stop-color="#2B1F31"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#714B67" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#714B67" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="globeFill" cx="0.34" cy="0.3" r="0.85">
+      <stop offset="0" stop-color="#3A2C43"/>
+      <stop offset="1" stop-color="#1D1622"/>
+    </radialGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D9BFD2"/>
+    </linearGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.1" fill="#FFFFFF" opacity="0.045"/>
+    </pattern>
+    <clipPath id="globeClip"><circle cx="988" cy="160" r="98"/></clipPath>
+  </defs>
+
+  <rect width="1200" height="320" rx="22" fill="url(#bg)"/>
+  <rect width="1200" height="320" rx="22" fill="url(#dots)"/>
+  <ellipse cx="988" cy="160" rx="300" ry="240" fill="url(#glow)"/>
+
+  <!-- eyebrow -->
+  <g transform="translate(64,50)">
+    <rect width="212" height="26" rx="13" fill="#714B67" fill-opacity="0.22" stroke="#B084A6" stroke-opacity="0.45"/>
+    <circle cx="17" cy="13" r="4" fill="#35C4B5"/>
+    <text x="30" y="17.5" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+          font-size="11" font-weight="700" letter-spacing="1.7" fill="#D9BFD2">ODOO HACKATHON 2026</text>
+  </g>
+
+  <text x="64" y="150" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+        font-size="62" font-weight="800" letter-spacing="-1.6" fill="url(#title)">GlobeTrotter</text>
+
+  <text x="66" y="186" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+        font-size="20" font-weight="500" fill="#A395AB">Empowering personalized travel planning</text>
+
+  <!-- capability chips -->
+  <g font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600">
+    <g transform="translate(64,220)">
+      <rect width="186" height="34" rx="10" fill="#2C2233" stroke="#3E3147"/>
+      <circle cx="18" cy="17" r="3.5" fill="#B084A6"/>
+      <text x="31" y="22" fill="#E7DEE9">Multi-city itineraries</text>
+    </g>
+    <g transform="translate(258,220)">
+      <rect width="152" height="34" rx="10" fill="#2C2233" stroke="#3E3147"/>
+      <circle cx="18" cy="17" r="3.5" fill="#35C4B5"/>
+      <text x="31" y="22" fill="#E7DEE9">Budget breakdown</text>
+    </g>
+    <g transform="translate(418,220)">
+      <rect width="132" height="34" rx="10" fill="#2C2233" stroke="#3E3147"/>
+      <circle cx="18" cy="17" r="3.5" fill="#E9A13B"/>
+      <text x="31" y="22" fill="#E7DEE9">Public sharing</text>
+    </g>
+  </g>
+
+  <!-- globe -->
+  <circle cx="988" cy="160" r="98" fill="url(#globeFill)" stroke="#5A4468" stroke-width="1.5"/>
+  <g clip-path="url(#globeClip)" fill="none" stroke="#B084A6" stroke-opacity="0.42" stroke-width="1.2">
+    <ellipse cx="988" cy="160" rx="98" ry="98"/>
+    <ellipse cx="988" cy="160" rx="64" ry="98"/>
+    <ellipse cx="988" cy="160" rx="30" ry="98"/>
+    <line x1="988" y1="62" x2="988" y2="258"/>
+    <ellipse cx="988" cy="160" rx="98" ry="24"/>
+    <ellipse cx="988" cy="112" rx="85" ry="20"/>
+    <ellipse cx="988" cy="208" rx="85" ry="20"/>
+  </g>
+  <g clip-path="url(#globeClip)" fill="#714B67" fill-opacity="0.5">
+    <path d="M930 108 q26 -14 48 2 q18 12 6 26 q-16 18 -40 8 q-22 -10 -14 -36 z"/>
+    <path d="M1002 168 q30 -10 44 10 q10 16 -8 28 q-24 14 -42 -6 q-12 -16 6 -32 z"/>
+    <path d="M916 186 q20 -6 28 10 q6 14 -10 20 q-20 6 -26 -12 q-4 -12 8 -18 z"/>
+  </g>
+
+  <!-- route -->
+  <path d="M902 214 C 940 150, 1010 128, 1074 118" fill="none" stroke="#35C4B5" stroke-width="2.4"
+        stroke-linecap="round" stroke-dasharray="7 7" opacity="0.95"/>
+  <g>
+    <circle cx="902" cy="214" r="7.5" fill="#16111A" stroke="#35C4B5" stroke-width="2.6"/>
+    <circle cx="978" cy="152" r="6" fill="#16111A" stroke="#E9A13B" stroke-width="2.4"/>
+    <circle cx="1074" cy="118" r="7.5" fill="#35C4B5" stroke="#16111A" stroke-width="2.2"/>
+  </g>
+</svg>

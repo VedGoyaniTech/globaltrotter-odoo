@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 470" width="1200" height="470" role="img" aria-label="How GlobeTrotter computes a trip budget breakdown">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#B084A6"/>
+  </marker>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#16111A"/><stop offset="1" stop-color="#241B2A"/>
+  </linearGradient>
+</defs>
+<rect width="1200" height="470" rx="18" fill="url(#bg)"/>
+<text x="48" y="44" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#8E8296" text-anchor="start" letter-spacing="1.6">SOURCES</text>
+<rect x="48" y="58" width="320" height="150" rx="13" fill="#221A28" stroke="#3E3147" stroke-width="1.2"/>
+<rect x="62" y="73" width="4" height="15" rx="2" fill="#35C4B5"/>
+<text x="74" y="86" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#F4EFF3" text-anchor="start">Itinerary (derived)</text>
+<text x="74" y="116" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="500" fill="#35C4B5" text-anchor="start">TripStop → TripActivity</text>
+<text x="74" y="140" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="500" fill="#8E8296" text-anchor="start">cost, scheduledDate</text>
+<text x="74" y="170" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#8E8296" text-anchor="start">Every activity you schedule already</text>
+<text x="74" y="190" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#8E8296" text-anchor="start">carries a cost — nothing to re-enter.</text>
+<rect x="48" y="248" width="320" height="150" rx="13" fill="#221A28" stroke="#3E3147" stroke-width="1.2"/>
+<rect x="62" y="263" width="4" height="15" rx="2" fill="#E9A13B"/>
+<text x="74" y="276" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#F4EFF3" text-anchor="start">Expenses (manual)</text>
+<text x="74" y="306" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="500" fill="#E9A13B" text-anchor="start">Expense</text>
+<text x="74" y="330" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="500" fill="#8E8296" text-anchor="start">category, amount, date?</text>
+<text x="74" y="360" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#8E8296" text-anchor="start">Flights, hotels, food — the things</text>
+<text x="74" y="380" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#8E8296" text-anchor="start">an itinerary cannot infer.</text>
+<path d="M376 133 L404 133 L404 228 L432 228" fill="none" stroke="#B084A6" stroke-opacity="0.7" stroke-width="1.6" marker-end="url(#ar)"/>
+<path d="M376 323 L404 323 L404 228 L432 228" fill="none" stroke="#B084A6" stroke-opacity="0.7" stroke-width="1.6" marker-end="url(#ar)"/>
+<text x="440" y="44" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#8E8296" text-anchor="start" letter-spacing="1.6">AGGREGATION</text>
+<rect x="440" y="58" width="320" height="340" rx="13" fill="#1D1622" stroke="#3E3147" stroke-width="1.2"/>
+<text x="466" y="88" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="13.5" font-weight="700" fill="#F4EFF3" text-anchor="start">getBreakdown(tripId)</text>
+<line x1="440" y1="104" x2="760" y2="104" stroke="#3E3147"/>
+<circle cx="478" cy="128" r="9" fill="#2C2233" stroke="#3E3147"/>
+<text x="478" y="132" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="10.5" font-weight="700" fill="#B084A6" text-anchor="middle">1</text>
+<text x="498" y="132" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#DDD3E0" text-anchor="start">Sum activity costs into ACTIVITIES</text>
+<circle cx="478" cy="168" r="9" fill="#2C2233" stroke="#3E3147"/>
+<text x="478" y="172" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="10.5" font-weight="700" fill="#B084A6" text-anchor="middle">2</text>
+<text x="498" y="172" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#DDD3E0" text-anchor="start">Add each Expense to its category</text>
+<circle cx="478" cy="208" r="9" fill="#2C2233" stroke="#3E3147"/>
+<text x="478" y="212" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="10.5" font-weight="700" fill="#B084A6" text-anchor="middle">3</text>
+<text x="498" y="212" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#DDD3E0" text-anchor="start">Bucket both by day — activities fall</text>
+<text x="498" y="229" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#DDD3E0" text-anchor="start">   on scheduledDate, else the stop start</text>
+<circle cx="478" cy="254" r="9" fill="#2C2233" stroke="#3E3147"/>
+<text x="478" y="258" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="10.5" font-weight="700" fill="#B084A6" text-anchor="middle">4</text>
+<text x="498" y="258" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#DDD3E0" text-anchor="start">averagePerDay = total ÷ trip length</text>
+<circle cx="478" cy="294" r="9" fill="#2C2233" stroke="#3E3147"/>
+<text x="478" y="298" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="10.5" font-weight="700" fill="#B084A6" text-anchor="middle">5</text>
+<text x="498" y="298" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#DDD3E0" text-anchor="start">Flag days above that average</text>
+<text x="466" y="378" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="500" fill="#8E8296" text-anchor="start">One query, no N+1 — stops, activities</text>
+<text x="466" y="394" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="500" fill="#8E8296" text-anchor="start">and expenses load in a single include.</text>
+<path d="M768 228 L800 228" fill="none" stroke="#B084A6" stroke-opacity="0.7" stroke-width="1.6" marker-end="url(#ar)"/>
+<text x="808" y="44" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#8E8296" text-anchor="start" letter-spacing="1.6">GET /api/trips/:id/budget</text>
+<rect x="808" y="58" width="344" height="104" rx="13" fill="#221A28" stroke="#3E3147" stroke-width="1.2"/>
+<rect x="822" y="73" width="4" height="15" rx="2" fill="#B084A6"/>
+<text x="834" y="86" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="13" font-weight="700" fill="#F4EFF3" text-anchor="start">totals</text>
+<text x="834" y="112" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11" font-weight="500" fill="#8E8296" text-anchor="start">TRANSPORT · STAY · ACTIVITIES</text>
+<text x="834" y="134" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11" font-weight="500" fill="#8E8296" text-anchor="start">MEALS · OTHER  → pie / bar chart</text>
+<rect x="808" y="178" width="344" height="104" rx="13" fill="#221A28" stroke="#3E3147" stroke-width="1.2"/>
+<rect x="822" y="193" width="4" height="15" rx="2" fill="#B084A6"/>
+<text x="834" y="206" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="13" font-weight="700" fill="#F4EFF3" text-anchor="start">perDay[]</text>
+<text x="834" y="232" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11" font-weight="500" fill="#8E8296" text-anchor="start">{ date, total, overAverage }</text>
+<text x="834" y="254" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="500" fill="#8E8296" text-anchor="start">drives the over-budget day warnings</text>
+<rect x="808" y="298" width="344" height="100" rx="13" fill="#221A28" stroke="#3E3147" stroke-width="1.2"/>
+<rect x="822" y="313" width="4" height="15" rx="2" fill="#B084A6"/>
+<text x="834" y="326" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="13" font-weight="700" fill="#F4EFF3" text-anchor="start">overBudget</text>
+<text x="834" y="352" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11" font-weight="500" fill="#E9A13B" text-anchor="start">total &gt; budgetLimit</text>
+<text x="834" y="374" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="500" fill="#8E8296" text-anchor="start">null limit → never flagged</text>
+<text x="48" y="442" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#8E8296" text-anchor="start">ACTIVITIES is the one category with two sources: itinerary costs plus any manual ACTIVITIES rows are summed together.</text>
+</svg>

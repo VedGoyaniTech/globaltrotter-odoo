@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700" role="img" aria-label="GlobeTrotter request architecture: React client through the Vite proxy into the Express pipeline, Prisma and PostgreSQL">
+<defs>
+  <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#B084A6"/>
+  </marker>
+  <marker id="arwT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#35C4B5"/>
+  </marker>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#16111A"/><stop offset="1" stop-color="#241B2A"/>
+  </linearGradient>
+</defs>
+<rect width="1200" height="700" rx="18" fill="url(#bg)"/>
+<text x="48" y="44" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#A395AB" text-anchor="start" letter-spacing="1.6">1 · CLIENT</text>
+<rect x="48" y="58" width="340" height="118" rx="14" fill="#221A28" stroke="#3E3147" stroke-width="1.2"/>
+<text x="70" y="88" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#F4EFF3" text-anchor="start">client/ — React + Vite + TS</text>
+<text x="70" y="114" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="500" fill="#A395AB" text-anchor="start">pages · components · layouts</text>
+<text x="70" y="136" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12.5" font-weight="500" fill="#35C4B5" text-anchor="start">lib/api.ts</text>
+<text x="158" y="136" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="500" fill="#A395AB" text-anchor="start">typed fetch + JWT header</text>
+<text x="70" y="158" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12.5" font-weight="500" fill="#35C4B5" text-anchor="start">types/api.ts</text>
+<text x="174" y="158" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="500" fill="#A395AB" text-anchor="start">response shapes</text>
+<line x1="396" y1="117" x2="428" y2="117" stroke="#B084A6" stroke-width="1.6" stroke-opacity="0.75" marker-end="url(#arw)"/>
+<text x="436" y="44" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#A395AB" text-anchor="start" letter-spacing="1.6">2 · DEV PROXY</text>
+<rect x="436" y="58" width="300" height="118" rx="14" fill="#221A28" stroke="#3E3147" stroke-width="1.2" stroke-dasharray="6 5"/>
+<text x="458" y="88" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#F4EFF3" text-anchor="start">Vite dev server :5173</text>
+<text x="458" y="114" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12.5" font-weight="500" fill="#35C4B5" text-anchor="start">/api → localhost:4000</text>
+<text x="458" y="140" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#A395AB" text-anchor="start">no CORS wiring in dev;</text>
+<text x="458" y="160" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#A395AB" text-anchor="start">same-origin in production</text>
+<line x1="744" y1="117" x2="776" y2="117" stroke="#B084A6" stroke-width="1.6" stroke-opacity="0.75" marker-end="url(#arw)"/>
+<text x="784" y="44" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#A395AB" text-anchor="start" letter-spacing="1.6">3 · API</text>
+<rect x="784" y="58" width="368" height="118" rx="14" fill="#221A28" stroke="#3E3147" stroke-width="1.2"/>
+<text x="806" y="88" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#F4EFF3" text-anchor="start">Express :4000</text>
+<text x="806" y="114" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12.5" font-weight="500" fill="#E9A13B" text-anchor="start">Authorization: Bearer &lt;jwt&gt;</text>
+<text x="806" y="140" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#A395AB" text-anchor="start">or a token cookie — either is</text>
+<text x="806" y="160" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#A395AB" text-anchor="start">accepted by the auth middleware</text>
+<line x1="968" y1="184" x2="968" y2="214" stroke="#B084A6" stroke-width="1.6" stroke-opacity="0.75" marker-end="url(#arw)"/>
+<rect x="48" y="222" width="1104" height="268" rx="14" fill="#1D1622" stroke="#3E3147" stroke-width="1.2"/>
+<text x="72" y="252" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#A395AB" text-anchor="start" letter-spacing="1.6">4 · REQUEST PIPELINE — every request walks this in order</text>
+<rect x="72.0" y="268" width="122.375" height="40" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="85.0" cy="288.0" r="3.2" fill="#B084A6"/>
+<text x="96.0" y="292.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="600" fill="#E7DEE9" text-anchor="start">helmet</text>
+<path d="M196.375 288.0 l6 0" stroke="#3E3147" stroke-width="1.4"/>
+<rect x="205.375" y="268" width="122.375" height="40" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="218.375" cy="288.0" r="3.2" fill="#B084A6"/>
+<text x="229.375" y="292.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="600" fill="#E7DEE9" text-anchor="start">cors</text>
+<path d="M329.75 288.0 l6 0" stroke="#3E3147" stroke-width="1.4"/>
+<rect x="338.75" y="268" width="122.375" height="40" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="351.75" cy="288.0" r="3.2" fill="#B084A6"/>
+<text x="362.75" y="292.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="600" fill="#E7DEE9" text-anchor="start">express.json</text>
+<path d="M463.125 288.0 l6 0" stroke="#3E3147" stroke-width="1.4"/>
+<rect x="472.125" y="268" width="122.375" height="40" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="485.125" cy="288.0" r="3.2" fill="#B084A6"/>
+<text x="496.125" y="292.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="600" fill="#E7DEE9" text-anchor="start">cookieParser</text>
+<path d="M596.5 288.0 l6 0" stroke="#3E3147" stroke-width="1.4"/>
+<rect x="605.5" y="268" width="122.375" height="40" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="618.5" cy="288.0" r="3.2" fill="#B084A6"/>
+<text x="629.5" y="292.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="600" fill="#E7DEE9" text-anchor="start">router match</text>
+<path d="M729.875 288.0 l6 0" stroke="#3E3147" stroke-width="1.4"/>
+<rect x="738.875" y="268" width="122.375" height="40" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="751.875" cy="288.0" r="3.2" fill="#E9A13B"/>
+<text x="762.875" y="292.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="600" fill="#E7DEE9" text-anchor="start">requireAuth</text>
+<path d="M863.25 288.0 l6 0" stroke="#3E3147" stroke-width="1.4"/>
+<rect x="872.25" y="268" width="122.375" height="40" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="885.25" cy="288.0" r="3.2" fill="#E9A13B"/>
+<text x="896.25" y="292.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="600" fill="#E7DEE9" text-anchor="start">validate(zod)</text>
+<path d="M996.625 288.0 l6 0" stroke="#3E3147" stroke-width="1.4"/>
+<rect x="1005.625" y="268" width="122.375" height="40" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="1018.625" cy="288.0" r="3.2" fill="#35C4B5"/>
+<text x="1029.625" y="292.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="600" fill="#E7DEE9" text-anchor="start">handler</text>
+<text x="72" y="336" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#A395AB" text-anchor="start">Any thrown ApiError short-circuits to the shared error handler → { error, details } + matching status</text>
+<text x="72" y="372" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#A395AB" text-anchor="start" letter-spacing="1.6">5 · DOMAIN MODULES — server/src/modules/*</text>
+<rect x="72.0" y="386" width="108.44444444444444" height="38" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="85.0" cy="405.0" r="3.2" fill="#B084A6"/>
+<text x="96.0" y="409.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" font-weight="600" fill="#E7DEE9" text-anchor="start">auth</text>
+<rect x="190.44444444444446" y="386" width="108.44444444444444" height="38" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="203.44444444444446" cy="405.0" r="3.2" fill="#B084A6"/>
+<text x="214.44444444444446" y="409.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" font-weight="600" fill="#E7DEE9" text-anchor="start">users</text>
+<rect x="308.8888888888889" y="386" width="108.44444444444444" height="38" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="321.8888888888889" cy="405.0" r="3.2" fill="#35C4B5"/>
+<text x="332.8888888888889" y="409.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" font-weight="600" fill="#E7DEE9" text-anchor="start">trips</text>
+<rect x="427.3333333333333" y="386" width="108.44444444444444" height="38" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="440.3333333333333" cy="405.0" r="3.2" fill="#35C4B5"/>
+<text x="451.3333333333333" y="409.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" font-weight="600" fill="#E7DEE9" text-anchor="start">stops</text>
+<rect x="545.7777777777778" y="386" width="108.44444444444444" height="38" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="558.7777777777778" cy="405.0" r="3.2" fill="#B084A6"/>
+<text x="569.7777777777778" y="409.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" font-weight="600" fill="#E7DEE9" text-anchor="start">cities</text>
+<rect x="664.2222222222222" y="386" width="108.44444444444444" height="38" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="677.2222222222222" cy="405.0" r="3.2" fill="#B084A6"/>
+<text x="688.2222222222222" y="409.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" font-weight="600" fill="#E7DEE9" text-anchor="start">activities</text>
+<rect x="782.6666666666666" y="386" width="108.44444444444444" height="38" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="795.6666666666666" cy="405.0" r="3.2" fill="#35C4B5"/>
+<text x="806.6666666666666" y="409.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" font-weight="600" fill="#E7DEE9" text-anchor="start">budget</text>
+<rect x="901.1111111111111" y="386" width="108.44444444444444" height="38" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="914.1111111111111" cy="405.0" r="3.2" fill="#B084A6"/>
+<text x="925.1111111111111" y="409.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" font-weight="600" fill="#E7DEE9" text-anchor="start">public</text>
+<rect x="1019.5555555555555" y="386" width="108.44444444444444" height="38" rx="9" fill="#2C2233" stroke="#3E3147"/>
+<circle cx="1032.5555555555557" cy="405.0" r="3.2" fill="#E9A13B"/>
+<text x="1043.5555555555557" y="409.2" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" font-weight="600" fill="#E7DEE9" text-anchor="start">admin</text>
+<text x="72" y="452" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="500" fill="#A395AB" text-anchor="start">Each module is routes + schema + service. Ownership is asserted before every mutation:</text>
+<text x="72" y="472" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" font-weight="500" fill="#E9A13B" text-anchor="start">getOwnedTrip(tripId, userId) → 404 if missing, 403 if it belongs to someone else</text>
+<line x1="600" y1="498" x2="600" y2="528" stroke="#B084A6" stroke-width="1.6" stroke-opacity="0.75" marker-end="url(#arw)"/>
+<text x="48" y="556" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="700" fill="#A395AB" text-anchor="start" letter-spacing="1.6">6 · DATA</text>
+<rect x="48" y="570" width="340" height="106" rx="14" fill="#221A28" stroke="#3E3147" stroke-width="1.2"/>
+<text x="70" y="600" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#F4EFF3" text-anchor="start">Prisma Client</text>
+<text x="70" y="626" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#A395AB" text-anchor="start">generated types shared by every</text>
+<text x="70" y="646" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#A395AB" text-anchor="start">service — no hand-written SQL</text>
+<line x1="396" y1="623" x2="428" y2="623" stroke="#B084A6" stroke-width="1.6" stroke-opacity="0.75" marker-end="url(#arw)"/>
+<rect x="436" y="570" width="300" height="106" rx="14" fill="#221A28" stroke="#3E3147" stroke-width="1.2"/>
+<text x="458" y="600" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#F4EFF3" text-anchor="start">PostgreSQL 16</text>
+<text x="458" y="626" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#A395AB" text-anchor="start">9 tables · Docker locally,</text>
+<text x="458" y="646" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#A395AB" text-anchor="start">service container in CI</text>
+<line x1="744" y1="623" x2="776" y2="623" stroke="#B084A6" stroke-width="1.6" stroke-opacity="0.75" marker-end="url(#arwT)"/>
+<rect x="784" y="570" width="368" height="106" rx="14" fill="#221A28" stroke="#3E3147" stroke-width="1.2"/>
+<text x="806" y="600" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#F4EFF3" text-anchor="start">Migrations</text>
+<text x="806" y="626" font-family="ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" font-weight="500" fill="#35C4B5" text-anchor="start">prisma migrate deploy</text>
+<text x="806" y="646" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#A395AB" text-anchor="start">runs on container boot and in CI</text>
+</svg>

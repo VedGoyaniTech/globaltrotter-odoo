@@ -15,5 +15,6 @@ client/dist/
 .turbo/
 *.tsbuildinfo
 
-# problem statement / reference docs - kept local
+# large source assets - kept local, web-sized copies are committed instead
 docs/*.pdf
+docs/GlobeTrotter - 8 hours.png
