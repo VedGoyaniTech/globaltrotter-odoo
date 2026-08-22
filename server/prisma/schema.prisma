@@ -1,0 +1,213 @@
+// GlobeTrotter - relational schema
+// Docs: server/README.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------- users
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  avatarUrl    String?
+  city         String?
+  country      String?
+  language     String   @default("en")
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  trips              Trip[]
+  savedDestinations  SavedDestination[]
+  passwordResets     PasswordResetToken[]
+
+  @@index([email])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------- destinations
+
+model City {
+  id         String  @id @default(cuid())
+  name       String
+  country    String
+  region     String?
+  // Relative cost of living / travel index. 100 = world average.
+  costIndex  Int     @default(100)
+  popularity Int     @default(0)
+  imageUrl   String?
+  latitude   Float?
+  longitude  Float?
+  createdAt  DateTime @default(now())
+
+  activities        Activity[]
+  tripStops         TripStop[]
+  savedDestinations SavedDestination[]
+
+  @@unique([name, country])
+  @@index([country])
+  @@index([popularity])
+}
+
+enum ActivityCategory {
+  SIGHTSEEING
+  FOOD
+  ADVENTURE
+  CULTURE
+  NIGHTLIFE
+  SHOPPING
+  NATURE
+  RELAXATION
+  TRANSPORT
+  OTHER
+}
+
+model Activity {
+  id              String           @id @default(cuid())
+  cityId          String
+  name            String
+  description     String?
+  category        ActivityCategory @default(OTHER)
+  // Estimated cost per person, in the platform's base currency.
+  cost            Decimal          @default(0) @db.Decimal(10, 2)
+  durationMinutes Int              @default(60)
+  imageUrl        String?
+  createdAt       DateTime         @default(now())
+
+  city          City           @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  tripActivities TripActivity[]
+
+  @@index([cityId])
+  @@index([category])
+}
+
+model SavedDestination {
+  id        String   @id @default(cuid())
+  userId    String
+  cityId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city City @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cityId])
+}
+
+// ---------------------------------------------------------------- trips
+
+model Trip {
+  id            String    @id @default(cuid())
+  userId        String
+  name          String
+  description   String?
+  startDate     DateTime  @db.Date
+  endDate       DateTime  @db.Date
+  coverPhotoUrl String?
+  // Optional user-set ceiling used for over-budget warnings.
+  budgetLimit   Decimal?  @db.Decimal(12, 2)
+  isPublic      Boolean   @default(false)
+  publicSlug    String?   @unique
+  // Set when a trip is created via "Copy Trip" from a public itinerary.
+  copiedFromId  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stops    TripStop[]
+  expenses Expense[]
+
+  @@index([userId])
+  @@index([publicSlug])
+}
+
+model TripStop {
+  id         String   @id @default(cuid())
+  tripId     String
+  cityId     String
+  startDate  DateTime @db.Date
+  endDate    DateTime @db.Date
+  // Position of this stop in the itinerary, 0-based.
+  orderIndex Int
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  trip       Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  city       City           @relation(fields: [cityId], references: [id])
+  activities TripActivity[]
+
+  @@unique([tripId, orderIndex])
+  @@index([tripId])
+}
+
+model TripActivity {
+  id         String    @id @default(cuid())
+  tripStopId String
+  // Null when the user typed a custom activity that isn't in the catalogue.
+  activityId String?
+  name       String
+  notes      String?
+  scheduledDate DateTime? @db.Date
+  startTime  String?   // "HH:mm", local to the stop
+  durationMinutes Int   @default(60)
+  cost       Decimal   @default(0) @db.Decimal(10, 2)
+  orderIndex Int
+  createdAt  DateTime  @default(now())
+
+  tripStop TripStop  @relation(fields: [tripStopId], references: [id], onDelete: Cascade)
+  activity Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+
+  @@index([tripStopId])
+  @@index([scheduledDate])
+}
+
+// -------------------------------------------------------------- budgeting
+
+enum ExpenseCategory {
+  TRANSPORT
+  STAY
+  ACTIVITIES
+  MEALS
+  OTHER
+}
+
+// Manual budget lines. Activity costs are summed separately from TripActivity,
+// so the breakdown = these rows + the ACTIVITIES total derived from the itinerary.
+model Expense {
+  id        String          @id @default(cuid())
+  tripId    String
+  category  ExpenseCategory
+  label     String
+  amount    Decimal         @db.Decimal(12, 2)
+  date      DateTime?       @db.Date
+  createdAt DateTime        @default(now())
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
+  @@index([tripId, category])
+}

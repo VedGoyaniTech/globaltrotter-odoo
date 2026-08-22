@@ -1,0 +1,19 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+.DS_Store
+.vscode/
+.idea/
+coverage/
+server/prisma/*.db
+client/dist/
+.turbo/
+*.tsbuildinfo
+
+# problem statement / reference docs - kept local
+docs/*.pdf
