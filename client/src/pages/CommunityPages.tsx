@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '../components/Icon';
+import { TravelImage } from '../components/TravelImage';
 import {
   Button,
   EmptyState,
@@ -10,7 +11,7 @@ import {
   SearchBox,
 } from '../components/ui';
 import { ApiError, api } from '../lib/api';
-import { travelFallback, travelVisuals } from '../lib/assets';
+import { localVisuals, travelBackground, travelFallback, travelVisuals } from '../lib/assets';
 import type { PublicTripCard, TimelineDay, Trip } from '../types/api';
 
 type PublicTrip = Trip & { days?: TimelineDay[]; user?: { name: string } };
@@ -85,7 +86,7 @@ export function CommunityPage() {
           {trips.map((trip, index) => (
             <article className="story-card" key={trip.id}>
               <Link to={`/share/${trip.publicSlug}`}>
-                <img src={trip.coverPhotoUrl ?? travelFallback(index)} alt="" />
+                <TravelImage src={trip.coverPhotoUrl ?? travelFallback(index)} alt="" />
               </Link>
               <div>
                 <p>
@@ -101,7 +102,12 @@ export function CommunityPage() {
                 </span>
                 <footer>
                   {trip.user.avatarUrl ? (
-                    <img className="avatar" src={trip.user.avatarUrl} alt="" />
+                    <TravelImage
+                      className="avatar"
+                      src={trip.user.avatarUrl}
+                      fallback={localVisuals.city}
+                      alt=""
+                    />
                   ) : (
                     <div className="avatar">{trip.user.name[0]}</div>
                   )}
@@ -133,6 +139,7 @@ export function PublicTripPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copying, setCopying] = useState(false);
+  const [shareStatus, setShareStatus] = useState('');
 
   useEffect(() => {
     if (!slug) {
@@ -171,6 +178,20 @@ export function PublicTripPage() {
     }
   };
 
+  const shareTrip = async () => {
+    try {
+      const shareData = { title: trip?.name ?? 'GlobeTrotter journey', url: window.location.href };
+      const nativeShare = Reflect.get(navigator, 'share') as
+        ((data: ShareData) => Promise<void>) | undefined;
+      if (nativeShare) await nativeShare.call(navigator, shareData);
+      else await navigator.clipboard.writeText(shareData.url);
+      setShareStatus(nativeShare ? 'Shared' : 'Link copied');
+    } catch (caught) {
+      if (caught instanceof DOMException && caught.name === 'AbortError') return;
+      setShareStatus('Share unavailable');
+    }
+  };
+
   if (loading)
     return (
       <main className="public-page">
@@ -200,13 +221,17 @@ export function PublicTripPage() {
       <header
         className="public-hero"
         style={{
-          backgroundImage: `linear-gradient(180deg, rgba(12,28,27,.05), rgba(12,28,27,.85)), url(${trip.coverPhotoUrl ?? travelVisuals.coast})`,
+          backgroundImage: travelBackground(
+            trip.coverPhotoUrl ?? travelVisuals.coast,
+            localVisuals.coast,
+          ),
         }}
       >
         <div>
           <p className="eyebrow">A shared GlobeTrotter journey</p>
           <h1>{trip.name}</h1>
           <p>{trip.description}</p>
+          {trip.user ? <small>Planned by {trip.user.name}</small> : null}
           <span>
             <Icon name="calendar" /> {trip.startDate} – {trip.endDate} · {trip.stops.length} stops
           </span>
@@ -219,9 +244,14 @@ export function PublicTripPage() {
             <p className="eyebrow">The route</p>
             <h2>A journey worth borrowing</h2>
           </div>
-          <Button onClick={copyTrip} disabled={copying}>
-            {copying ? 'Copying…' : 'Copy this itinerary'} <Icon name="plus" />
-          </Button>
+          <div className="public-content__actions">
+            <Button variant="secondary" onClick={() => void shareTrip()}>
+              <Icon name="share" /> {shareStatus || 'Share'}
+            </Button>
+            <Button onClick={copyTrip} disabled={copying}>
+              {copying ? 'Copying…' : 'Copy this itinerary'} <Icon name="plus" />
+            </Button>
+          </div>
         </div>
         <div className="public-route">
           {trip.stops.map((stop, index) => (

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '../components/Icon';
+import { TravelImage } from '../components/TravelImage';
 import {
   Button,
   EmptyState,
@@ -13,7 +14,7 @@ import {
   TextareaField,
 } from '../components/ui';
 import { ApiError, api } from '../lib/api';
-import { travelFallback, travelVisuals } from '../lib/assets';
+import { localVisuals, travelBackground, travelFallback, travelVisuals } from '../lib/assets';
 import type {
   BudgetBreakdown,
   City,
@@ -71,6 +72,16 @@ export function TripsPage() {
     return () => window.clearTimeout(timer);
   }, [filter, query]);
 
+  const deleteTrip = async (trip: TripListItem) => {
+    if (!window.confirm(`Delete “${trip.name}” and its complete itinerary?`)) return;
+    try {
+      await api.delete(`/trips/${trip.id}`);
+      setTrips((current) => current.filter((item) => item.id !== trip.id));
+    } catch (caught) {
+      setError(caught instanceof ApiError ? caught.message : 'This trip could not be deleted.');
+    }
+  };
+
   return (
     <div className="page">
       <PageHeader
@@ -106,7 +117,7 @@ export function TripsPage() {
           {trips.map((trip, index) => (
             <article className="trip-card" key={trip.id}>
               <Link to={`/trips/${trip.id}`} className="trip-card__image">
-                <img src={trip.coverPhotoUrl ?? travelFallback(index)} alt="" />
+                <TravelImage src={trip.coverPhotoUrl ?? travelFallback(index)} alt="" />
                 <TripStatus trip={trip} />
                 <span className="trip-card__days">
                   {dayCount(trip.startDate, trip.endDate)} days
@@ -132,6 +143,14 @@ export function TripsPage() {
                   <Link to={`/trips/${trip.id}/build`}>
                     Edit <Icon name="arrow" />
                   </Link>
+                  <button
+                    type="button"
+                    className="trip-card__delete"
+                    onClick={() => void deleteTrip(trip)}
+                    aria-label={`Delete ${trip.name}`}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </article>
@@ -164,6 +183,7 @@ export function CreateTripPage() {
     cityId: '',
   });
   const [error, setError] = useState('');
+  const [cover, setCover] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -186,6 +206,7 @@ export function CreateTripPage() {
         endDate: form.endDate,
         budgetLimit: form.budgetLimit ? Number(form.budgetLimit) : undefined,
       });
+      if (cover) await api.upload(`/trips/${trip.id}/cover`, cover);
       if (form.cityId)
         await api.post(`/trips/${trip.id}/stops`, {
           cityId: form.cityId,
@@ -245,6 +266,15 @@ export function CreateTripPage() {
                 required
               />
             </div>
+            <label className="cover-upload">
+              <span>{cover ? cover.name : 'Add a cover photo'}</span>
+              <small>Optional · JPEG, PNG, or WebP up to 5 MB</small>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(event) => setCover(event.target.files?.[0] ?? null)}
+              />
+            </label>
             <div className="field-grid">
               <SelectField
                 label="First destination"
@@ -274,7 +304,7 @@ export function CreateTripPage() {
           </form>
         </section>
         <aside className="planner-inspiration">
-          <img src={travelVisuals.city} alt="Illustrated sunlit city street" />
+          <TravelImage src={travelVisuals.street} alt="Sunlit European street" />
           <div>
             <span>01</span>
             <p>“Not all those who wander are lost.”</p>
@@ -343,7 +373,10 @@ export function TripDetailPage() {
       <section
         className="itinerary-hero"
         style={{
-          backgroundImage: `linear-gradient(180deg, rgba(10,25,24,.1), rgba(10,25,24,.88)), url(${trip.coverPhotoUrl ?? travelVisuals.coast})`,
+          backgroundImage: travelBackground(
+            trip.coverPhotoUrl ?? travelVisuals.coast,
+            localVisuals.coast,
+          ),
         }}
       >
         <div>
@@ -498,6 +531,7 @@ export function TripBuilderPage() {
     notes: '',
   });
   const [saving, setSaving] = useState(false);
+  const [actionError, setActionError] = useState('');
   useEffect(() => {
     api
       .get<Paginated<City>>('/cities?sort=popularity&limit=50')
@@ -519,10 +553,31 @@ export function TripBuilderPage() {
   const addStop = async (event: FormEvent) => {
     event.preventDefault();
     setSaving(true);
+    setActionError('');
     try {
       await api.post(`/trips/${tripId}/stops`, form);
       setForm({ cityId: '', startDate: '', endDate: '', notes: '' });
       refresh();
+    } catch (caught) {
+      setActionError(caught instanceof ApiError ? caught.message : 'Could not add this stop.');
+    } finally {
+      setSaving(false);
+    }
+  };
+  const moveStop = async (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= trip.stops.length) return;
+    const ordered = [...trip.stops];
+    [ordered[index], ordered[nextIndex]] = [ordered[nextIndex], ordered[index]];
+    setSaving(true);
+    setActionError('');
+    try {
+      await api.put(`/trips/${tripId}/stops/reorder`, {
+        stopIds: ordered.map((stop) => stop.id),
+      });
+      refresh();
+    } catch (caught) {
+      setActionError(caught instanceof ApiError ? caught.message : 'Could not reorder the route.');
     } finally {
       setSaving(false);
     }
@@ -539,6 +594,7 @@ export function TripBuilderPage() {
           </Link>
         }
       />
+      {actionError ? <ErrorNotice message={actionError} /> : null}
       <div className="builder-layout">
         <section className="builder-canvas">
           <div className="builder-canvas__intro">
@@ -549,6 +605,24 @@ export function TripBuilderPage() {
             <article className="builder-stop" key={stop.id}>
               <span className="builder-stop__number">{index + 1}</span>
               <div>
+                <div className="builder-stop__controls" aria-label={`Reorder ${stop.city.name}`}>
+                  <button
+                    type="button"
+                    disabled={index === 0 || saving}
+                    onClick={() => void moveStop(index, -1)}
+                    aria-label="Move stop earlier"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    disabled={index === trip.stops.length - 1 || saving}
+                    onClick={() => void moveStop(index, 1)}
+                    aria-label="Move stop later"
+                  >
+                    ↓
+                  </button>
+                </div>
                 <p className="eyebrow">
                   Stop {index + 1} · {readableDate(stop.startDate)}
                 </p>
@@ -560,7 +634,7 @@ export function TripBuilderPage() {
                   {stop.activities.map((activity) => (
                     <span key={activity.id}>{activity.name}</span>
                   ))}
-                  <Link to={`/activities?cityId=${stop.cityId}`}>
+                  <Link to={`/activities?cityId=${stop.cityId}&tripId=${tripId}&stopId=${stop.id}`}>
                     <Icon name="plus" /> Find activities
                   </Link>
                 </div>
@@ -913,56 +987,118 @@ export function CalendarPage() {
 export function CalendarHubPage() {
   const [trips, setTrips] = useState<TripListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [month, setMonth] = useState(
+    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+  );
   useEffect(() => {
     api
-      .get<Paginated<TripListItem>>('/trips?filter=upcoming&limit=40')
+      .get<Paginated<TripListItem>>('/trips?limit=40')
       .then((data) => setTrips(data.items))
+      .catch(() => setError('Your travel calendar could not be refreshed.'))
       .finally(() => setLoading(false));
   }, []);
-  const months = useMemo(
-    () =>
-      Array.from({ length: 12 }, (_, month) =>
-        new Date(new Date().getFullYear(), month, 1).toLocaleDateString('en', {
-          month: 'long',
-        }),
+  const calendarDays = useMemo(() => {
+    const firstWeekday = month.getDay();
+    const dayTotal = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+    return [
+      ...Array.from({ length: firstWeekday }, () => null),
+      ...Array.from(
+        { length: dayTotal },
+        (_, index) => new Date(month.getFullYear(), month.getMonth(), index + 1),
       ),
-    [],
-  );
+    ];
+  }, [month]);
+  const monthLabel = month.toLocaleDateString('en', { month: 'long', year: 'numeric' });
+  const moveMonth = (offset: number) =>
+    setMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
+  const dateKey = (date: Date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+  const tripsForDate = (date: Date) => {
+    const key = dateKey(date);
+    return trips.filter(
+      (trip) => trip.startDate.slice(0, 10) <= key && trip.endDate.slice(0, 10) >= key,
+    );
+  };
   return (
     <div className="page">
       <PageHeader
-        eyebrow="Year at a glance"
+        eyebrow="Calendar and timeline"
         title="Your travel calendar"
-        description="See how the adventures ahead fit into the rhythm of your year."
+        description="See departures, travel days, and overlapping plans in a true month view."
       />
+      {error ? <ErrorNotice message={error} /> : null}
       {loading ? (
         <LoadingState />
       ) : (
-        <div className="year-grid">
-          {months.map((month, monthIndex) => {
-            const monthTrips = trips.filter(
-              (trip) => new Date(`${trip.startDate}T00:00:00`).getMonth() === monthIndex,
-            );
-            return (
-              <section className="month-card" key={month}>
-                <h2>{month}</h2>
-                {monthTrips.map((trip) => (
-                  <Link key={trip.id} to={`/trips/${trip.id}/calendar`}>
-                    <span
-                      style={{
-                        background: monthIndex % 2 ? '#246c67' : '#e9785d',
-                      }}
-                    />
-                    <div>
-                      <strong>{trip.name}</strong>
-                      <small>{readableDate(trip.startDate)}</small>
-                    </div>
-                  </Link>
-                ))}
-                {!monthTrips.length ? <p>Open skies</p> : null}
-              </section>
-            );
-          })}
+        <div className="calendar-hub">
+          <section className="month-calendar">
+            <header>
+              <button type="button" onClick={() => moveMonth(-1)} aria-label="Previous month">
+                ←
+              </button>
+              <h2>{monthLabel}</h2>
+              <button type="button" onClick={() => moveMonth(1)} aria-label="Next month">
+                →
+              </button>
+            </header>
+            <div className="month-calendar__weekdays">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                <span key={day}>{day}</span>
+              ))}
+            </div>
+            <div className="month-calendar__days">
+              {calendarDays.map((date, index) =>
+                date ? (
+                  <div
+                    className={date.toDateString() === new Date().toDateString() ? 'today' : ''}
+                    key={dateKey(date)}
+                  >
+                    <span>{date.getDate()}</span>
+                    {tripsForDate(date)
+                      .slice(0, 2)
+                      .map((trip) => (
+                        <Link key={trip.id} to={`/trips/${trip.id}/calendar`}>
+                          {trip.name}
+                        </Link>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="empty-day" key={`empty-${index}`} />
+                ),
+              )}
+            </div>
+          </section>
+          <aside className="calendar-agenda">
+            <p className="eyebrow">Journey agenda</p>
+            <h2>Trips in {monthLabel}</h2>
+            {trips
+              .filter(
+                (trip) =>
+                  new Date(`${trip.startDate}T00:00:00`).getMonth() === month.getMonth() &&
+                  new Date(`${trip.startDate}T00:00:00`).getFullYear() === month.getFullYear(),
+              )
+              .map((trip) => (
+                <Link key={trip.id} to={`/trips/${trip.id}/calendar`}>
+                  <span>
+                    {new Date(`${trip.startDate}T00:00:00`).toLocaleDateString('en', {
+                      day: '2-digit',
+                      month: 'short',
+                    })}
+                  </span>
+                  <div>
+                    <strong>{trip.name}</strong>
+                    <small>
+                      {trip.stops.length} stops · {dayCount(trip.startDate, trip.endDate)} days
+                    </small>
+                  </div>
+                </Link>
+              ))}
+            <Link className="button button--primary" to="/trips/new">
+              <Icon name="plus" /> Plan a journey
+            </Link>
+          </aside>
         </div>
       )}
     </div>

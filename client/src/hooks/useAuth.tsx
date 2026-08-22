@@ -12,7 +12,10 @@ import type { AuthResponse, User } from '../types/api';
 
 type Credentials = { email: string; password: string };
 type SignupDetails = Credentials & {
-  name: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  bio?: string;
   city?: string;
   country?: string;
 };

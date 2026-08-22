@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Icon } from '../components/Icon';
 import { ErrorNotice, LoadingState, PageHeader } from '../components/ui';
+import { useAuth } from '../hooks/useAuth';
 import { api } from '../lib/api';
+import type { Role } from '../types/api';
 
 interface AdminStats {
   counts: {
@@ -26,9 +28,11 @@ interface AdminUser {
 }
 
 export function AdminPage() {
+  const { user: currentUser } = useAuth();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
   useEffect(() => {
     Promise.all([
       api.get<AdminStats>('/admin/stats'),
@@ -66,6 +70,28 @@ export function AdminPage() {
       icon: 'compass' as const,
     },
   ];
+  const changeRole = async (user: AdminUser) => {
+    setActionError('');
+    try {
+      const role: Role = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
+      const updated = await api.patch<AdminUser>(`/admin/users/${user.id}/role`, { role });
+      setUsers((current) =>
+        current.map((item) => (item.id === user.id ? { ...item, role: updated.role } : item)),
+      );
+    } catch (caught) {
+      setActionError(caught instanceof Error ? caught.message : 'Role update failed.');
+    }
+  };
+  const removeUser = async (user: AdminUser) => {
+    if (!window.confirm(`Delete ${user.name} and all of their journeys?`)) return;
+    setActionError('');
+    try {
+      await api.delete(`/admin/users/${user.id}`);
+      setUsers((current) => current.filter((item) => item.id !== user.id));
+    } catch (caught) {
+      setActionError(caught instanceof Error ? caught.message : 'User deletion failed.');
+    }
+  };
   return (
     <div className="page admin-page">
       <PageHeader
@@ -132,6 +158,7 @@ export function AdminPage() {
         </section>
       </div>
       <section className="admin-card admin-users">
+        {actionError ? <ErrorNotice message={actionError} /> : null}
         <div className="section-heading">
           <div>
             <p className="eyebrow">Latest arrivals</p>
@@ -149,6 +176,7 @@ export function AdminPage() {
                 <th>Role</th>
                 <th>Journeys</th>
                 <th>Joined</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -166,6 +194,24 @@ export function AdminPage() {
                   </td>
                   <td>{user._count?.trips ?? 0}</td>
                   <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                  <td>
+                    <div className="admin-user-actions">
+                      <button
+                        type="button"
+                        disabled={currentUser?.id === user.id}
+                        onClick={() => void changeRole(user)}
+                      >
+                        {user.role === 'ADMIN' ? 'Make user' : 'Make admin'}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={currentUser?.id === user.id}
+                        onClick={() => void removeUser(user)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -2,9 +2,9 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { ApiError, api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
-import { Button, ErrorNotice, Field } from '../components/ui';
+import { Button, ErrorNotice, Field, TextareaField } from '../components/ui';
 import { Icon } from '../components/Icon';
-import { travelVisuals } from '../lib/assets';
+import { localVisuals, travelBackground, travelVisuals } from '../lib/assets';
 
 function AuthLayout({
   children,
@@ -19,9 +19,7 @@ function AuthLayout({
     <main className="auth-layout">
       <section
         className="auth-visual"
-        style={{
-          backgroundImage: `linear-gradient(180deg, rgba(14,36,34,.04), rgba(14,36,34,.76)), url(${travelVisuals.journey})`,
-        }}
+        style={{ backgroundImage: travelBackground(travelVisuals.auth, localVisuals.journey) }}
       >
         <Link className="brand brand--light" to="/">
           <span className="brand__mark">G</span>
@@ -127,11 +125,14 @@ export function SignupPage() {
   const { user, signup } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
+    phone: '',
     city: '',
     country: '',
+    bio: '',
   });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -165,17 +166,33 @@ export function SignupPage() {
         <form onSubmit={submit} className="auth-form">
           <div className="field-grid">
             <Field
-              label="Full name"
-              value={form.name}
-              onChange={(e) => update('name', e.target.value)}
+              label="First name"
+              autoComplete="given-name"
+              value={form.firstName}
+              onChange={(e) => update('firstName', e.target.value)}
+              required
+            />
+            <Field
+              label="Last name"
+              autoComplete="family-name"
+              value={form.lastName}
+              onChange={(e) => update('lastName', e.target.value)}
               required
             />
             <Field
               label="Email address"
               type="email"
+              autoComplete="email"
               value={form.email}
               onChange={(e) => update('email', e.target.value)}
               required
+            />
+            <Field
+              label="Phone number"
+              type="tel"
+              autoComplete="tel"
+              value={form.phone}
+              onChange={(e) => update('phone', e.target.value)}
             />
             <Field
               label="Home city"
@@ -188,10 +205,18 @@ export function SignupPage() {
               onChange={(e) => update('country', e.target.value)}
             />
           </div>
+          <TextareaField
+            className="auth-bio"
+            label="A little about your travel style"
+            rows={2}
+            value={form.bio}
+            onChange={(e) => update('bio', e.target.value)}
+          />
           <Field
             label="Password"
             type="password"
             minLength={8}
+            autoComplete="new-password"
             value={form.password}
             onChange={(e) => update('password', e.target.value)}
             hint="Use at least 8 characters."

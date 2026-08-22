@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Icon';
+import { TravelImage } from '../components/TravelImage';
 import { EmptyState, ErrorNotice, LoadingState, PageHeader, SearchBox } from '../components/ui';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../lib/api';
-import { travelFallback, travelVisuals } from '../lib/assets';
-import type { City, Paginated, TripListItem } from '../types/api';
+import { localVisuals, travelBackground, travelFallback, travelVisuals } from '../lib/assets';
+import type { City, Paginated, TripListItem, TripSummary } from '../types/api';
 
 function formatDateRange(trip: TripListItem) {
   const start = new Date(`${trip.startDate}T00:00:00`);
@@ -18,6 +19,7 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const [trips, setTrips] = useState<TripListItem[]>([]);
   const [cities, setCities] = useState<City[]>([]);
+  const [summary, setSummary] = useState<TripSummary | null>(null);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -26,12 +28,14 @@ export function DashboardPage() {
     let active = true;
     Promise.all([
       api.get<Paginated<TripListItem>>('/trips?limit=4'),
-      api.get<Paginated<City>>('/cities?sort=popularity&limit=4'),
+      api.get<City[]>('/cities/recommended?limit=4'),
+      api.get<TripSummary>('/trips/summary'),
     ])
-      .then(([tripData, cityData]) => {
+      .then(([tripData, cityData, summaryData]) => {
         if (active) {
           setTrips(tripData.items);
-          setCities(cityData.items);
+          setCities(cityData);
+          setSummary(summaryData);
         }
       })
       .catch(
@@ -72,7 +76,11 @@ export function DashboardPage() {
       <section
         className="hero-card"
         style={{
-          backgroundImage: `linear-gradient(90deg, rgba(15,40,38,.88), rgba(15,40,38,.18)), url(${travelVisuals.coast})`,
+          backgroundImage: travelBackground(
+            travelVisuals.hero,
+            localVisuals.coast,
+            'linear-gradient(90deg, rgba(8,31,31,.9), rgba(8,31,31,.16))',
+          ),
         }}
       >
         <div className="hero-card__content">
@@ -96,6 +104,31 @@ export function DashboardPage() {
           <span>WANDER OFTEN</span>
         </div>
       </section>
+      {summary ? (
+        <section className="dashboard-pulse" aria-label="Travel plan summary">
+          <div>
+            <span>Upcoming</span>
+            <strong>{summary.counts.upcoming}</strong>
+            <small>journeys ahead</small>
+          </div>
+          <div>
+            <span>Active budget</span>
+            <strong>${summary.budget.plannedTotal.toLocaleString()}</strong>
+            <small>
+              {summary.budget.overBudgetTrips
+                ? `${summary.budget.overBudgetTrips} over budget`
+                : 'plans on track'}
+            </small>
+          </div>
+          <div>
+            <span>Next departure</span>
+            <strong>
+              {summary.nextTrip ? `${Math.max(summary.nextTrip.daysUntil, 0)} days` : 'Open'}
+            </strong>
+            <small>{summary.nextTrip?.name ?? 'room for a new story'}</small>
+          </div>
+        </section>
+      ) : null}
       <section className="content-section">
         <div className="section-heading">
           <div>
@@ -109,7 +142,7 @@ export function DashboardPage() {
         <div className="destination-grid">
           {cities.map((city, index) => (
             <Link to={`/cities?city=${city.id}`} className="destination-card" key={city.id}>
-              <img src={city.imageUrl ?? travelFallback(index)} alt="" />
+              <TravelImage src={city.imageUrl ?? travelFallback(index)} alt="" />
               <span className="destination-card__save">
                 <Icon name="heart" />
               </span>
@@ -145,7 +178,7 @@ export function DashboardPage() {
             {trips.map((trip, index) => (
               <Link className="journey-card" to={`/trips/${trip.id}`} key={trip.id}>
                 <div className="journey-card__image">
-                  <img src={trip.coverPhotoUrl ?? travelFallback(index + 1)} alt="" />
+                  <TravelImage src={trip.coverPhotoUrl ?? travelFallback(index + 1)} alt="" />
                   <span>{new Date(trip.endDate) < new Date() ? 'Travelled' : 'Upcoming'}</span>
                 </div>
                 <div>
