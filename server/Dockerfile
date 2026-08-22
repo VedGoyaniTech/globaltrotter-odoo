@@ -33,4 +33,6 @@ USER node
 EXPOSE 4000
 
 # Migrations are applied on boot so a fresh environment self-provisions.
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+# Migrations always run. Seeding is opt-in so the demo stack can populate
+# itself on a fresh volume without the image doing it wherever it lands.
+CMD ["sh", "-c", "npx prisma migrate deploy && { [ \"$SEED_ON_BOOT\" != \"true\" ] || node dist/prisma/seed.js; } && node dist/index.js"]

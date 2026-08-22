@@ -32,6 +32,13 @@ services:
       JWT_EXPIRES_IN: 7d
       TRUST_PROXY: 0
       UPLOAD_DIR: /app/uploads
+      # Populates cities, activities and the demo accounts on first run so a
+      # fresh clone is not an empty app. The seed is idempotent.
+      SEED_ON_BOOT: "true"
+      APP_URL: http://localhost:5173
+      # No mail provider in the demo stack - the reset link is printed to
+      # `docker compose logs backend`. Set to smtp with SMTP_URL to really send.
+      MAIL_TRANSPORT: log
     ports:
       - "4000:4000"
     volumes:
