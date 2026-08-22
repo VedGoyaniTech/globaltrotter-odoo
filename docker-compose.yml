@@ -8,7 +8,11 @@ services:
       POSTGRES_PASSWORD: globetrotter
       POSTGRES_DB: globetrotter
     ports:
-      - "5432:5432"
+      # Loopback only. The API reaches Postgres over the compose network, so the
+      # published port exists purely for local psql / Prisma Studio. Binding to
+      # 0.0.0.0 would expose the database — and these demo credentials — to
+      # everyone on the same network.
+      - "127.0.0.1:5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
