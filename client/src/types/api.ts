@@ -18,8 +18,13 @@ export type ExpenseCategory = 'TRANSPORT' | 'STAY' | 'ACTIVITIES' | 'MEALS' | 'O
 
 export interface User {
   id: string;
+  /** Display name — derived from firstName + lastName when signup sends those. */
   name: string;
+  firstName: string | null;
+  lastName: string | null;
   email: string;
+  phone: string | null;
+  bio: string | null;
   avatarUrl: string | null;
   city: string | null;
   country: string | null;
@@ -72,6 +77,8 @@ export interface TripStop {
   startDate: string;
   endDate: string;
   orderIndex: number;
+  /** Optional planning target for this leg. Decimal — arrives as a string. */
+  budget: string | null;
   notes: string | null;
   city: City;
   activities: TripActivity[];
@@ -118,6 +125,29 @@ export interface TimelineDay {
   cityId: string | null;
   cityName: string | null;
   activities: TripActivity[];
+}
+
+/** Trip list buckets. Disjoint: a trip starting today is `ongoing`, not `upcoming`. */
+export type TripFilter = 'all' | 'upcoming' | 'ongoing' | 'past';
+
+/** One card in the community feed — `GET /api/public/trips`. */
+export interface PublicTripCard {
+  id: string;
+  name: string;
+  description: string | null;
+  startDate: string;
+  endDate: string;
+  coverPhotoUrl: string | null;
+  publicSlug: string;
+  createdAt: string;
+  user: Pick<User, 'id' | 'name' | 'avatarUrl'>;
+  stopCount: number;
+  cities: Pick<City, 'id' | 'name' | 'country'>[];
+}
+
+export interface CountryOption {
+  country: string;
+  cities: number;
 }
 
 export interface Paginated<T> {
