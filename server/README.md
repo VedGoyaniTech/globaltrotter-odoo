@@ -39,6 +39,7 @@ or every client will look like one IP and the limits will fire on the wrong peop
 | ------ | -------------------------------- | ------------------------------------------------------------------------- |
 | PATCH  | `/me`                            | name, firstName, lastName, phone, bio, avatarUrl, city, country, language |
 | PATCH  | `/me/email`                      | `{ email, currentPassword }` — re-authenticated |
+| PATCH  | `/me/password`                   | `{ currentPassword, newPassword }`          |
 | POST   | `/me/avatar`                     | `multipart/form-data`, field `image`                                      |
 | DELETE | `/me`                            | deletes account + trips                                                   |
 | GET    | `/me/saved-destinations`         | saved city list                                                           |
@@ -166,9 +167,32 @@ discarded — and the response carries a `/uploads/<name>` URL served as a stati
 Replacing an image deletes the previous one. In Docker, `/app/uploads` is a volume;
 without one, images vanish when the container is replaced.
 
+## Email
+
+Password reset is the only mail the API sends. `MAIL_TRANSPORT` picks how:
+
+| Value | Behaviour |
+| --- | --- |
+| `log` (default) | Prints the message to stdout. Local development works with no account anywhere, and the response includes `devResetToken`. |
+| `smtp` | Really sends, via `SMTP_URL` or `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD`. Any provider works — nothing here is vendor-specific. |
+| `memory` | Captures into an in-process outbox. Used by the test suite. |
+
+Under `smtp` with nothing configured, the server logs a warning at boot and
+`/auth/forgot-password` answers `503` rather than returning `200` for an email that
+will never arrive. `APP_URL` builds the link inside the message.
+
+Changing a password — by reset or via `PATCH /users/me/password` — deletes that user's
+outstanding reset tokens, so an old link cannot be used afterwards.
+
 ## Health
 
-`GET /api/health` → `{ status: "ok", time }`
+| Path | Checks | Use for |
+| --- | --- | --- |
+| `GET /api/health` | process is up | liveness probe |
+| `GET /api/health/ready` | runs `SELECT 1` against Postgres | readiness probe; `503` when the database is unreachable |
+
+Point the platform's health check at `/api/health/ready` — the shallow one reports
+healthy while the database is down.
 
 ## Data model
 

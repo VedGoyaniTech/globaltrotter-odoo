@@ -23,6 +23,8 @@ export default defineConfig({
       SIGNUP_RATE_LIMIT_MAX: '100000',
       RESET_RATE_LIMIT_MAX: '100000',
       UPLOAD_DIR: 'tests/.uploads',
+      MAIL_TRANSPORT: 'memory',
+      APP_URL: 'http://localhost:5173',
     },
     include: ['tests/**/*.test.ts'],
   },

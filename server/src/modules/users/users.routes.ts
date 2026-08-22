@@ -6,7 +6,7 @@ import { requireAuth } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
 import { publicUrlFor, removeUploaded, uploadImage } from '../../middleware/upload.js';
 import { ApiError } from '../../lib/errors.js';
-import { verifyPassword } from '../../lib/password.js';
+import { hashPassword, verifyPassword } from '../../lib/password.js';
 
 export const usersRouter = Router();
 usersRouter.use(requireAuth);
@@ -97,6 +97,45 @@ usersRouter.patch(
     ]);
 
     res.json(updated);
+  }),
+);
+
+const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1),
+    newPassword: z.string().min(8, 'Password must be at least 8 characters').max(128),
+  })
+  .refine((v) => v.currentPassword !== v.newPassword, {
+    message: 'The new password must be different from the current one',
+    path: ['newPassword'],
+  });
+
+// PATCH /api/users/me/password - change while signed in.
+usersRouter.patch(
+  '/me/password',
+  validate({ body: changePasswordSchema }),
+  asyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body as z.infer<typeof changePasswordSchema>;
+
+    const account = await prisma.user.findUniqueOrThrow({
+      where: { id: req.user!.id },
+      select: { passwordHash: true },
+    });
+    if (!(await verifyPassword(currentPassword, account.passwordHash))) {
+      throw ApiError.unauthorized('Current password is incorrect');
+    }
+
+    // Outstanding reset links are a second way into the account; changing the
+    // password deliberately should close them.
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: req.user!.id },
+        data: { passwordHash: await hashPassword(newPassword) },
+      }),
+      prisma.passwordResetToken.deleteMany({ where: { userId: req.user!.id } }),
+    ]);
+
+    res.json({ message: 'Password updated' });
   }),
 );
 

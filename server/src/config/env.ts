@@ -18,6 +18,16 @@ const schema = z.object({
   // Number of reverse proxies in front of the app. Rate limiting keys on the
   // client IP, so this must be right or every request looks like one address.
   TRUST_PROXY: z.coerce.number().int().min(0).max(10).default(0),
+  // Public origin of the frontend, used to build links inside emails.
+  APP_URL: z.string().url().default('http://localhost:5173'),
+  // smtp = really send; log = print to stdout (local dev); memory = capture (tests).
+  MAIL_TRANSPORT: z.enum(['smtp', 'log', 'memory']).default('log'),
+  MAIL_FROM: z.string().default('GlobeTrotter <no-reply@globetrotter.app>'),
+  SMTP_URL: z.string().optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
   UPLOAD_DIR: z.string().default('uploads'),
   MAX_UPLOAD_BYTES: z.coerce
     .number()
