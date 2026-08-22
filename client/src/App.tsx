@@ -1,37 +1,46 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
+import { LoadingState } from './components/ui';
+import { AuthProvider, useAuth } from './hooks/useAuth';
+import { AppShell } from './layouts/AppShell';
+import { AdminPage } from './pages/AdminPage';
+import { ForgotPasswordPage, LoginPage, SignupPage } from './pages/AuthPages';
+import { CommunityPage, PublicTripPage } from './pages/CommunityPages';
+import { DashboardPage } from './pages/DashboardPage';
+import { ActivitiesPage, CitiesPage } from './pages/ExplorePages';
+import { ProfilePage } from './pages/ProfilePage';
+import { BudgetPage, CalendarHubPage, CalendarPage, CreateTripPage, TripBuilderPage, TripDetailPage, TripsPage } from './pages/TripsPages';
 
-/**
- * Route skeleton only - one route per screen in the brief.
- * Screens live in src/pages and are owned by the frontend/design track.
- */
-export function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Placeholder name="Login" />} />
-        <Route path="/signup" element={<Placeholder name="Signup" />} />
-        <Route path="/forgot-password" element={<Placeholder name="Forgot password" />} />
-
-        <Route path="/" element={<Placeholder name="Dashboard" />} />
-        <Route path="/trips" element={<Placeholder name="My trips" />} />
-        <Route path="/trips/new" element={<Placeholder name="Create trip" />} />
-        <Route path="/trips/:tripId" element={<Placeholder name="Itinerary view" />} />
-        <Route path="/trips/:tripId/build" element={<Placeholder name="Itinerary builder" />} />
-        <Route path="/trips/:tripId/budget" element={<Placeholder name="Budget breakdown" />} />
-        <Route path="/trips/:tripId/calendar" element={<Placeholder name="Calendar / timeline" />} />
-
-        <Route path="/cities" element={<Placeholder name="City search" />} />
-        <Route path="/activities" element={<Placeholder name="Activity search" />} />
-        <Route path="/profile" element={<Placeholder name="Profile / settings" />} />
-        <Route path="/admin" element={<Placeholder name="Admin dashboard" />} />
-
-        <Route path="/share/:slug" element={<Placeholder name="Public itinerary" />} />
-        <Route path="*" element={<Placeholder name="Not found" />} />
-      </Routes>
-    </BrowserRouter>
-  );
+function ProtectedApp() {
+  const { user, loading } = useAuth();
+  if (loading) return <main className="boot-screen"><LoadingState label="Opening your travel journal..." /></main>;
+  return user ? <AppShell /> : <Navigate to="/login" replace />;
 }
 
-function Placeholder({ name }: { name: string }) {
-  return <main style={{ padding: 24, fontFamily: 'system-ui' }}>{name} — not built yet</main>;
+function NotFoundPage() {
+  return <main className="not-found"><span>404</span><p className="eyebrow">A delightful detour</p><h1>This road is not on the map.</h1><p>Let’s get you back to a journey we know.</p><Link className="button button--primary" to="/">Return home</Link></main>;
+}
+
+export function App() {
+  return <BrowserRouter><AuthProvider><Routes>
+    <Route path="/login" element={<LoginPage />} />
+    <Route path="/signup" element={<SignupPage />} />
+    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+    <Route path="/share/:slug" element={<PublicTripPage />} />
+    <Route element={<ProtectedApp />}>
+      <Route path="/" element={<DashboardPage />} />
+      <Route path="/trips" element={<TripsPage />} />
+      <Route path="/trips/new" element={<CreateTripPage />} />
+      <Route path="/trips/:tripId" element={<TripDetailPage />} />
+      <Route path="/trips/:tripId/build" element={<TripBuilderPage />} />
+      <Route path="/trips/:tripId/budget" element={<BudgetPage />} />
+      <Route path="/trips/:tripId/calendar" element={<CalendarPage />} />
+      <Route path="/cities" element={<CitiesPage />} />
+      <Route path="/activities" element={<ActivitiesPage />} />
+      <Route path="/calendar" element={<CalendarHubPage />} />
+      <Route path="/community" element={<CommunityPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/admin" element={<AdminPage />} />
+    </Route>
+    <Route path="*" element={<NotFoundPage />} />
+  </Routes></AuthProvider></BrowserRouter>;
 }
